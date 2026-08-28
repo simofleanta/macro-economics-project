@@ -6,8 +6,10 @@ and whether inflation statistically predicts annual stock returns.
 
 ## Interactive charts
 
-- **[Nominal vs. Real Returns](https://simofleanta.github.io/macro-economics-project/real-vs-nominal.html)** — cumulative and monthly nominal vs. inflation-adjusted returns for 5 BVB stocks (2021–2025).
+- **[Nominal vs. Real Returns](https://simofleanta.github.io/macro-economics-project/real-vs-nominal.html)** — cumulative and monthly nominal vs. inflation-adjusted returns for 5 BVB stocks, trailing 5 years.
 - **[Inflation-Return Regression](https://simofleanta.github.io/macro-economics-project/inflation-regression.html)** — scatter plots, regression lines, and a chart showing how statistical significance depends on the time horizon used.
+
+Both charts refresh automatically — see [Keeping it up to date](#keeping-it-up-to-date).
 
 ## Data
 
@@ -34,14 +36,18 @@ and whether inflation statistically predicts annual stock returns.
 
 ## Key findings
 
-- Cumulative inflation, Aug 2021 – Dec 2025: **+44%**. Nominal stock price gains
-  over the same period look large (+142% to +309% across the 5 stocks), but the
-  real (inflation-adjusted) gains are much smaller (+68% to +184%).
+(Illustrative, based on the most recent data refresh — see the live charts above
+for current numbers, since these move as the trailing window rolls forward.)
+
+- Nominal stock price gains over the trailing 5-year window look large (roughly
+  +100% to +300% across the 5 stocks), but a large share of that is inflation:
+  real (inflation-adjusted) gains are much smaller once the cumulative inflation
+  over the same period (currently ~48%) is backed out.
 - A regression of annual real return on average annual inflation is
-  **statistically significant** (p ≈ 0.04) when using only the last 4–5 years
-  (2021–2025) — but the relationship **disappears** (p > 0.15) once 6 or more
-  years of history are included. The apparent relationship is mostly driven by
-  the 2022 inflation shock, not a stable long-term pattern.
+  **statistically significant** (p ≈ 0.04) when using only the last 4–5 years —
+  but the relationship **disappears** (p > 0.15) once 6 or more years of history
+  are included. The apparent relationship is mostly driven by the 2022 inflation
+  shock, not a stable long-term pattern.
 
 ## Requirements
 
@@ -54,29 +60,41 @@ See [`requirements.txt`](requirements.txt) — needs `pandas`, `yfinance`, `scip
 
 ## Running it
 
-Scripts run in this order, from the repo root (they write to an `output/` folder):
+```
+python scripts/run_all.py
+```
 
-```
-python scripts/fetch_prices.py
-python scripts/fetch_inflation.py
-python scripts/build_nominal_vs_real.py
-python scripts/regression_analysis.py
-```
+runs the full pipeline in order (writes to an `output/` folder, and refreshes the
+two JSON files behind the charts in `docs/`). The steps, individually:
 
 - `fetch_prices.py` — downloads stock price/volume history, saves to
   `output/BVB_historical_price_volume.xlsx` and `output/bvb.db`
   (table `historical_prices`).
 - `fetch_inflation.py` — downloads Romania's inflation data, saves to the same
   Excel workbook (`Inflation_RO` sheet) and database (table `inflation_ro`).
+  Must run after `fetch_prices.py` (it appends to the same workbook).
 - `build_nominal_vs_real.py` — computes the inflation-adjusted price series,
   saves to the database (table `monthly_nominal_vs_real`).
-- `regression_analysis.py` — runs the annual regression and prints the
-  time-horizon sensitivity table.
+- `build_charts_data.py` — recomputes `docs/real-vs-nominal-data.json` and
+  `docs/inflation-regression-data.json` from a trailing window anchored to the
+  latest available data, so the published charts stay current.
+- `regression_analysis.py` — standalone script that prints the annual
+  regression and time-horizon sensitivity table to the console (not needed for
+  the charts, useful for exploring the data directly).
+
+## Keeping it up to date
+
+A [GitHub Actions workflow](.github/workflows/refresh-data.yml) runs the full
+pipeline automatically on the 1st of every month (and can be triggered manually
+from the Actions tab) and commits the refreshed `docs/*-data.json` files. The
+published charts read their data from those JSON files at load time, so they
+update automatically after each run — no manual refresh needed.
 
 ## Repository structure
 
 ```
 scripts/    data collection & analysis scripts
-docs/       interactive charts (published via GitHub Pages)
-output/     generated data (not tracked in git — created when scripts run)
+docs/       interactive charts + their data files (published via GitHub Pages)
+output/     generated Excel/SQLite data (not tracked in git — created when scripts run)
+.github/    the scheduled refresh workflow
 ```

@@ -98,13 +98,13 @@
     <h1>Return vs. inflation — where the statistical relationship shows up, and why it disappears</h1>
     <p class="subtitle">
       Simple linear regression: each stock's annual return (Dec-to-Dec), compared with that year's average
-      inflation rate. The panels below show the relationship over the last 5 years (2021-2025, the only window
-      where it comes out statistically significant), plus a chart showing why it disappears once more years are added.
+      inflation rate. The panels below show the relationship over the last 5 years (<span id="window-label">…</span>,
+      the only window where it comes out statistically significant), plus a chart showing why it disappears once more years are added.
     </p>
 
     <section>
       <div class="section-title">Annual return vs. average annual inflation</div>
-      <div class="section-sub">2021-2025 · 5 stocks × 5 years = 25 observations</div>
+      <div class="section-sub"><span id="window-label-2">…</span> · 5 stocks × 5 years = <span id="n-obs">…</span> observations</div>
       <div class="legend">
         <div class="legend-item"><span class="swatch nominal"></span>Nominal</div>
         <div class="legend-item"><span class="swatch real"></span>Real (inflation-adjusted)</div>
@@ -114,7 +114,7 @@
 
     <section>
       <div class="section-title">Why the time horizon matters</div>
-      <div class="section-sub">regression p-value, as a function of how many prior years are included (counting back from 2025)</div>
+      <div class="section-sub">regression p-value, as a function of how many prior years are included (counting back from <span id="latest-year">…</span>)</div>
       <div class="legend">
         <div class="legend-item"><span class="swatch nominal"></span>Nominal</div>
         <div class="legend-item"><span class="swatch real"></span>Real (inflation-adjusted)</div>
@@ -128,14 +128,24 @@
     <footer>
       OLS regression (scipy.stats.linregress). Each point = one stock-year observation; the line is the regression
       fit through those points. The conventional significance threshold is p &lt; 0.05 (dashed line in the second chart).
-      Once 6+ years are included, the relationship no longer clears that threshold — the 2021-2025 signal is
-      dominated by the 2022 inflation shock, not a stable long-term pattern.
+      Once 6+ years are included, the relationship no longer clears that threshold — the recent-years signal is
+      dominated by an inflation shock a few years back, not a stable long-term pattern.
     </footer>
   </div>
 </div>
 
 <script>
-const RD = {"scatter_points": [{"symbol": "EL", "year": 2021, "avg_inflation_pct": 4.11, "nominal_ret_yr": -15.16, "real_ret_yr": -20.48}, {"symbol": "EL", "year": 2022, "avg_inflation_pct": 11.98, "nominal_ret_yr": -15.02, "real_ret_yr": -25.55}, {"symbol": "EL", "year": 2023, "avg_inflation_pct": 9.83, "nominal_ret_yr": 43.87, "real_ret_yr": 34.45}, {"symbol": "EL", "year": 2024, "avg_inflation_pct": 5.85, "nominal_ret_yr": 15.96, "real_ret_yr": 9.97}, {"symbol": "EL", "year": 2025, "avg_inflation_pct": 6.75, "nominal_ret_yr": 101.93, "real_ret_yr": 85.96}, {"symbol": "SNG", "year": 2021, "avg_inflation_pct": 4.11, "nominal_ret_yr": 47.03, "real_ret_yr": 37.82}, {"symbol": "SNG", "year": 2022, "avg_inflation_pct": 11.98, "nominal_ret_yr": 4.66, "real_ret_yr": -8.31}, {"symbol": "SNG", "year": 2023, "avg_inflation_pct": 9.83, "nominal_ret_yr": 43.92, "real_ret_yr": 34.49}, {"symbol": "SNG", "year": 2024, "avg_inflation_pct": 5.85, "nominal_ret_yr": 2.47, "real_ret_yr": -2.83}, {"symbol": "SNG", "year": 2025, "avg_inflation_pct": 6.75, "nominal_ret_yr": 98.99, "real_ret_yr": 83.25}, {"symbol": "SNN", "year": 2021, "avg_inflation_pct": 4.11, "nominal_ret_yr": 178.85, "real_ret_yr": 161.38}, {"symbol": "SNN", "year": 2022, "avg_inflation_pct": 11.98, "nominal_ret_yr": -4.75, "real_ret_yr": -16.55}, {"symbol": "SNN", "year": 2023, "avg_inflation_pct": 9.83, "nominal_ret_yr": 25.19, "real_ret_yr": 16.99}, {"symbol": "SNN", "year": 2024, "avg_inflation_pct": 5.85, "nominal_ret_yr": -8.44, "real_ret_yr": -13.18}, {"symbol": "SNN", "year": 2025, "avg_inflation_pct": 6.75, "nominal_ret_yr": 40.77, "real_ret_yr": 29.63}, {"symbol": "SNP", "year": 2021, "avg_inflation_pct": 4.11, "nominal_ret_yr": 44.44, "real_ret_yr": 35.4}, {"symbol": "SNP", "year": 2022, "avg_inflation_pct": 11.98, "nominal_ret_yr": 7.69, "real_ret_yr": -5.65}, {"symbol": "SNP", "year": 2023, "avg_inflation_pct": 9.83, "nominal_ret_yr": 60.71, "real_ret_yr": 50.19}, {"symbol": "SNP", "year": 2024, "avg_inflation_pct": 5.85, "nominal_ret_yr": 37.78, "real_ret_yr": 30.65}, {"symbol": "SNP", "year": 2025, "avg_inflation_pct": 6.75, "nominal_ret_yr": 51.61, "real_ret_yr": 39.62}, {"symbol": "TLV", "year": 2021, "avg_inflation_pct": 4.11, "nominal_ret_yr": 30.0, "real_ret_yr": 21.86}, {"symbol": "TLV", "year": 2022, "avg_inflation_pct": 11.98, "nominal_ret_yr": -8.88, "real_ret_yr": -20.16}, {"symbol": "TLV", "year": 2023, "avg_inflation_pct": 9.83, "nominal_ret_yr": 44.81, "real_ret_yr": 35.32}, {"symbol": "TLV", "year": 2024, "avg_inflation_pct": 5.85, "nominal_ret_yr": 32.81, "real_ret_yr": 25.94}, {"symbol": "TLV", "year": 2025, "avg_inflation_pct": 6.75, "nominal_ret_yr": 43.61, "real_ret_yr": 32.25}], "nominal_line": {"x": [4.108333333333333, 11.975], "y": [55.954297703228804, 12.696029270268582], "slope": -5.499, "intercept": 78.546, "r2": 0.136, "p": 0.0694}, "real_line": {"x": [4.108333333333333, 11.975], "y": [46.94696314442885, 1.306051188088503], "slope": -5.802, "intercept": 70.783, "r2": 0.168, "p": 0.0421}, "sensitivity": [{"k": 4, "years": "2022-2025", "n": 20, "p_nominal": 0.0783, "p_real": 0.0425, "r2_nominal": 0.162, "r2_real": 0.209}, {"k": 5, "years": "2021-2025", "n": 25, "p_nominal": 0.0694, "p_real": 0.0421, "r2_nominal": 0.136, "r2_real": 0.168}, {"k": 6, "years": "2020-2025", "n": 30, "p_nominal": 0.5634, "p_real": 0.3369, "r2_nominal": 0.012, "r2_real": 0.033}, {"k": 7, "years": "2019-2025", "n": 35, "p_nominal": 0.3502, "p_real": 0.1695, "r2_nominal": 0.026, "r2_real": 0.056}, {"k": 8, "years": "2018-2025", "n": 39, "p_nominal": 0.3636, "p_real": 0.1652, "r2_nominal": 0.022, "r2_real": 0.051}, {"k": 9, "years": "2017-2025", "n": 43, "p_nominal": 0.4336, "p_real": 0.1851, "r2_nominal": 0.015, "r2_real": 0.042}, {"k": 10, "years": "2016-2025", "n": 47, "p_nominal": 0.9212, "p_real": 0.6014, "r2_nominal": 0.0, "r2_real": 0.006}]};
+fetch('./inflation-regression-data.json').then(r => r.json()).then(RD => { render(RD); });
+
+function render(RD) {
+
+populateHeader(RD);
+function populateHeader(RD) {
+  document.querySelectorAll('#window-label, #window-label-2').forEach(e => e.textContent = RD.window_years);
+  document.getElementById('n-obs').textContent = RD.scatter_points.length;
+  document.getElementById('latest-year').textContent = RD.window_years.split('-')[1];
+}
+
 
 function cssVar(name) {
   return getComputedStyle(document.querySelector('.viz-root')).getPropertyValue(name).trim();
@@ -301,6 +311,8 @@ function renderScatter(container, points, yKey, line, color, title, sub) {
   drawLine('p_nominal', SERIES1);
   drawLine('p_real', SERIES2);
 })();
+
+} // end render()
 </script>
 </body>
 </html>

@@ -117,25 +117,25 @@
       A stock's nominal price can climb a lot, but if prices across the economy climb just as fast, your
       purchasing power isn't really growing. The charts below compare <strong>nominal return</strong>
       (the price gain as it appears on the exchange) with <strong>real return</strong> (that same gain, adjusted for
-      Romania's inflation) for 5 BVB-listed stocks, August 2021 – December 2025.
+      Romania's inflation) for 5 BVB-listed stocks, <span id="period-label">…</span>.
     </p>
 
     <div class="stats-row">
       <div class="stat-tile">
-        <div class="stat-label">Cumulative inflation, Aug 2021 – Dec 2025</div>
-        <div class="stat-value">+44.0%</div>
-        <div class="stat-note">1,000 RON from August 2021 buys about as much as ~694 RON does today.</div>
+        <div class="stat-label">Cumulative inflation, <span id="period-label-2">…</span></div>
+        <div class="stat-value" id="cum-inflation-value">…</div>
+        <div class="stat-note" id="cum-inflation-note">…</div>
       </div>
       <div class="stat-tile">
         <div class="stat-label">Average nominal – real gap (5 stocks)</div>
-        <div class="stat-value">93 percentage points</div>
+        <div class="stat-value" id="avg-gap-value">…</div>
         <div class="stat-note">That's roughly how much of the headline stock-market gain was "eaten" by inflation, on average.</div>
       </div>
     </div>
 
     <section>
       <div class="section-title">Cumulative gain by stock</div>
-      <div class="section-sub">August 2021 – December 2025</div>
+      <div class="section-sub" id="period-label-3">…</div>
       <div class="legend">
         <div class="legend-item"><span class="swatch nominal"></span>Nominal (exchange price)</div>
         <div class="legend-item"><span class="swatch real"></span>Real (inflation-adjusted)</div>
@@ -147,7 +147,7 @@
     </section>
 
     <section>
-      <div class="section-title">Monthly price evolution (indexed, August 2021 = 100)</div>
+      <div class="section-title">Monthly price evolution (indexed, <span id="period-label-4">…</span> = 100)</div>
       <div class="section-sub">dashed line = the "no real gain" threshold</div>
       <div class="legend">
         <div class="legend-item"><span class="swatch nominal"></span>Nominal</div>
@@ -169,14 +169,19 @@
     <footer>
       Sources: prices &amp; volume — Yahoo Finance (daily, converted to last trading day of the month); inflation —
       Eurostat, Harmonised Index of Consumer Prices (HICP), Romania, base 2015=100. Inflation data has a
-      ~2-month reporting lag, which is why the series stops at December 2025 even though stock prices continue further.
+      ~2-month reporting lag, which is why this chart's window trails the latest inflation data rather than today's date.
       Real return = nominal return divided by the growth in the HICP index over the same period.
     </footer>
   </div>
 </div>
 
 <script>
-const DATA = {"EL": {"months": ["2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "nominal_idx": [100.0, 99.14, 101.72, 85.36, 87.27, 88.9, 84.31, 80.0, 78.28, 78.66, 79.81, 75.02, 72.44, 56.36, 59.71, 69.0, 74.16, 75.5, 82.97, 79.81, 80.86, 78.95, 78.95, 85.45, 88.33, 92.06, 89.19, 90.91, 106.7, 105.93, 108.71, 123.83, 123.83, 129.47, 145.84, 152.34, 137.42, 128.23, 119.43, 115.6, 123.73, 131.39, 138.85, 120.29, 122.01, 142.49, 139.43, 170.14, 176.94, 184.59, 228.52, 226.7, 249.86], "real_idx": [100.0, 98.32, 99.56, 83.34, 84.77, 85.16, 79.92, 74.39, 71.1, 70.58, 71.06, 66.5, 63.92, 49.28, 51.51, 58.78, 63.11, 63.75, 69.37, 66.17, 66.52, 64.64, 64.33, 69.53, 71.32, 73.72, 71.01, 72.46, 84.85, 83.33, 84.85, 96.22, 95.88, 100.22, 112.82, 117.17, 105.39, 97.95, 90.58, 87.4, 93.31, 98.17, 103.04, 88.96, 90.05, 104.65, 101.96, 122.77, 125.05, 129.82, 159.83, 157.78, 173.52], "final_nominal_pct": 149.9, "final_real_pct": 73.5}, "SNG": {"months": ["2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "nominal_idx": [100.0, 109.54, 117.56, 105.73, 122.9, 119.47, 121.37, 126.34, 141.98, 141.98, 158.78, 163.36, 152.29, 136.26, 130.53, 136.26, 128.63, 136.64, 137.79, 135.11, 132.06, 138.55, 150.76, 150.0, 149.62, 166.03, 168.32, 177.1, 185.11, 188.93, 184.73, 207.25, 193.89, 200.38, 220.23, 219.08, 212.6, 205.34, 200.38, 184.35, 189.69, 199.62, 217.94, 221.76, 219.85, 252.29, 258.78, 300.38, 301.53, 321.76, 361.07, 361.07, 377.48], "real_idx": [100.0, 108.64, 115.06, 103.22, 119.37, 114.44, 115.06, 117.48, 128.96, 127.41, 141.37, 144.79, 134.38, 119.13, 112.6, 116.09, 109.46, 115.38, 115.21, 112.02, 108.65, 113.43, 122.86, 122.05, 120.81, 132.96, 134.02, 141.16, 147.21, 148.62, 144.19, 161.05, 150.13, 155.11, 170.37, 168.5, 163.05, 156.85, 151.99, 139.38, 143.05, 149.15, 161.73, 164.0, 162.26, 185.29, 189.24, 216.75, 213.11, 226.28, 252.54, 251.31, 262.15], "final_nominal_pct": 277.5, "final_real_pct": 162.1}, "SNN": {"months": ["2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "nominal_idx": [100.0, 127.94, 144.32, 144.83, 157.22, 154.71, 138.33, 147.7, 150.02, 151.69, 157.45, 163.57, 156.89, 148.68, 140.65, 148.49, 149.74, 154.99, 152.2, 159.16, 160.05, 179.81, 170.3, 172.02, 179.63, 186.31, 173.74, 181.58, 187.47, 188.26, 180.23, 188.26, 187.84, 190.86, 188.77, 193.97, 183.81, 174.52, 178.05, 165.66, 171.65, 168.54, 173.09, 163.81, 166.5, 181.76, 182.23, 202.23, 203.34, 200.28, 209.51, 224.45, 241.62], "real_idx": [100.0, 126.88, 141.25, 141.39, 152.7, 148.2, 131.13, 137.34, 136.26, 136.12, 140.19, 144.98, 138.44, 129.98, 121.33, 126.51, 127.43, 130.87, 127.27, 131.96, 131.67, 147.22, 138.78, 139.97, 145.04, 149.2, 138.33, 144.73, 149.09, 148.09, 140.68, 146.29, 145.45, 147.74, 146.03, 149.18, 140.97, 133.31, 135.05, 125.25, 129.44, 125.93, 128.44, 121.14, 122.88, 133.49, 133.26, 145.92, 143.71, 140.85, 146.54, 156.22, 167.8], "final_nominal_pct": 141.6, "final_real_pct": 67.8}, "SNP": {"months": ["2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "nominal_idx": [100.0, 104.35, 113.04, 104.35, 113.04, 108.7, 104.35, 108.7, 108.7, 113.04, 121.74, 143.48, 139.13, 121.74, 130.43, 134.78, 121.74, 134.78, 139.13, 134.78, 143.48, 156.52, 156.52, 169.57, 169.57, 195.65, 182.61, 182.61, 195.65, 200.0, 208.7, 230.43, 234.78, 256.52, 278.26, 286.96, 282.61, 273.91, 278.26, 269.57, 269.57, 273.91, 282.61, 278.26, 269.57, 286.96, 304.35, 313.04, 339.13, 352.17, 378.26, 378.26, 408.7], "real_idx": [100.0, 103.49, 110.65, 101.87, 109.8, 104.12, 98.92, 101.07, 98.72, 101.44, 108.4, 127.17, 122.77, 106.43, 112.52, 114.83, 103.6, 113.81, 116.34, 111.75, 118.04, 128.15, 127.55, 137.98, 136.91, 156.68, 145.4, 145.55, 155.59, 157.32, 162.9, 179.07, 181.8, 198.56, 215.26, 220.7, 216.75, 209.23, 211.06, 203.8, 203.28, 204.66, 209.72, 205.79, 198.95, 210.75, 222.56, 225.88, 239.68, 247.67, 264.57, 263.27, 283.82], "final_nominal_pct": 308.7, "final_real_pct": 183.8}, "TLV": {"months": ["2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "nominal_idx": [100.0, 102.43, 95.91, 94.84, 98.64, 100.39, 97.47, 93.29, 90.95, 96.69, 89.79, 88.91, 89.79, 75.39, 76.75, 90.76, 89.88, 89.59, 88.81, 88.04, 86.48, 85.31, 93.58, 104.96, 107.0, 112.55, 119.46, 123.25, 130.16, 133.37, 139.49, 149.32, 152.33, 167.41, 178.4, 185.7, 184.05, 177.04, 180.84, 168.97, 172.86, 175.78, 183.07, 183.07, 180.25, 192.02, 209.44, 222.86, 221.21, 226.07, 225.29, 241.25, 248.25], "real_idx": [100.0, 101.59, 93.88, 92.6, 95.81, 96.16, 92.4, 86.75, 82.61, 86.76, 79.94, 78.81, 79.23, 65.91, 66.21, 77.32, 76.49, 75.65, 74.26, 72.99, 71.15, 69.85, 76.26, 85.41, 86.4, 90.13, 95.11, 98.24, 103.51, 104.91, 108.88, 116.03, 117.96, 129.59, 138.01, 142.82, 141.16, 135.24, 137.16, 127.75, 130.36, 131.34, 135.86, 135.4, 133.04, 141.03, 153.15, 160.81, 156.34, 158.99, 157.58, 167.91, 172.4], "final_nominal_pct": 148.2, "final_real_pct": 72.4}};
+fetch('./real-vs-nominal-data.json').then(r => r.json()).then(DATA => { render(DATA); });
+
+function render(DATA) {
+
+const SERIES = DATA.series;
+const META = DATA.meta;
 
 const SERIES1 = getComputedStyleVar('--series-1');
 const SERIES2 = getComputedStyleVar('--series-2');
@@ -184,6 +189,20 @@ const SERIES2 = getComputedStyleVar('--series-2');
 function getComputedStyleVar(name) {
   return getComputedStyle(document.querySelector('.viz-root')).getPropertyValue(name).trim();
 }
+
+function monthLabel(ym) {
+  const [y, m] = ym.split('-');
+  const names = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return `${names[parseInt(m, 10) - 1]} ${y}`;
+}
+
+const periodText = `${monthLabel(META.start_month)} – ${monthLabel(META.end_month)}`;
+document.querySelectorAll('#period-label, #period-label-2, #period-label-3').forEach(e => e.textContent = periodText);
+document.getElementById('period-label-4').textContent = monthLabel(META.start_month);
+document.getElementById('cum-inflation-value').textContent = `+${META.cumulative_inflation_pct.toFixed(1)}%`;
+document.getElementById('cum-inflation-note').textContent =
+  `1,000 RON from ${monthLabel(META.start_month)} buys about as much as ~${Math.round(1000 / (1 + META.cumulative_inflation_pct / 100))} RON does today.`;
+document.getElementById('avg-gap-value').textContent = `${META.avg_gap_pp.toFixed(0)} percentage points`;
 
 const ORDER = ['SNP','SNG','EL','TLV','SNN'];
 const NAMES = { SNP: 'OMV Petrom', SNG: 'Romgaz', EL: 'Electrica', TLV: 'Banca Transilvania', SNN: 'Nuclearelectrica' };
@@ -215,7 +234,7 @@ const NAMES = { SNP: 'OMV Petrom', SNG: 'Romgaz', EL: 'Electrica', TLV: 'Banca T
   }
 
   ORDER.forEach((sym, i) => {
-    const d = DATA[sym];
+    const d = SERIES[sym];
     const cx = ML + i * groupW + groupW / 2;
     const bars = [
       { val: d.final_nominal_pct, color: SERIES1, x: cx - barW - gap / 2 },
@@ -262,7 +281,7 @@ const NAMES = { SNP: 'OMV Petrom', SNG: 'Romgaz', EL: 'Electrica', TLV: 'Banca T
   }
 
   ORDER.forEach(sym => {
-    const d = DATA[sym];
+    const d = SERIES[sym];
     const months = d.months, nom = d.nominal_idx, real = d.real_idx;
     const n = months.length;
 
@@ -363,13 +382,15 @@ const NAMES = { SNP: 'OMV Petrom', SNG: 'Romgaz', EL: 'Electrica', TLV: 'Banca T
 (function renderTable(){
   const body = document.getElementById('summary-body');
   ORDER.forEach(sym => {
-    const d = DATA[sym];
+    const d = SERIES[sym];
     const gap = (d.final_nominal_pct - d.final_real_pct).toFixed(1);
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${sym} — ${NAMES[sym]}</td><td>+${d.final_nominal_pct.toFixed(1)}%</td><td>+${d.final_real_pct.toFixed(1)}%</td><td class="gap">${gap} pp</td>`;
     body.appendChild(tr);
   });
 })();
+
+} // end render()
 </script>
 </body>
 </html>

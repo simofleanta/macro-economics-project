@@ -1,6 +1,7 @@
 """Download daily OHLCV price history for BVB-listed stocks from Yahoo Finance
 and save it to an Excel workbook (one sheet per symbol) and a SQLite table."""
 
+import os
 import sqlite3
 
 import pandas as pd
@@ -11,6 +12,7 @@ PERIOD = "11y"
 XLSX_PATH = "output/BVB_historical_price_volume.xlsx"
 DB_PATH = "output/bvb.db"
 
+os.makedirs("output", exist_ok=True)
 conn = sqlite3.connect(DB_PATH)
 conn.execute("DROP TABLE IF EXISTS historical_prices")
 conn.execute(
