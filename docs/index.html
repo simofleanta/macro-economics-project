@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Macro-Economics Project — BVB Stocks vs. Romanian Inflation</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f9f9f7;
+    --surface: #fcfcfb;
+    --text: #0b0b0b;
+    --muted: #52514e;
+    --border: rgba(11,11,11,0.10);
+    --link: #2a78d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0d0d;
+      --surface: #1a1a19;
+      --text: #ffffff;
+      --muted: #c3c2b7;
+      --border: rgba(255,255,255,0.10);
+      --link: #3987e5;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 48px 20px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 24px; margin: 0 0 8px; }
+  p.lead { color: var(--muted); font-size: 15px; line-height: 1.6; margin: 0 0 32px; }
+  .card {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin-bottom: 14px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .card h2 { font-size: 16px; margin: 0 0 6px; color: var(--link); }
+  .card p { font-size: 13.5px; color: var(--muted); margin: 0; line-height: 1.5; }
+  footer { margin-top: 40px; font-size: 12.5px; color: var(--muted); }
+  footer a { color: var(--link); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>BVB Stocks vs. Romanian Inflation</h1>
+    <p class="lead">
+      A small macroeconomics project comparing nominal stock returns on the Bucharest Stock Exchange (BVB)
+      against Romania's inflation-adjusted ("real") returns, and testing whether inflation statistically
+      predicts annual stock performance.
+    </p>
+
+    <a class="card" href="real-vs-nominal.html">
+      <h2>Chart 1 — Nominal vs. Real Returns</h2>
+      <p>Cumulative and monthly nominal vs. inflation-adjusted returns for 5 BVB stocks, 2021–2025.</p>
+    </a>
+
+    <a class="card" href="inflation-regression.html">
+      <h2>Chart 2 — Inflation-Return Regression</h2>
+      <p>Scatter plots and regression lines, plus a sensitivity chart showing how statistical
+      significance depends on the time horizon used.</p>
+    </a>
+
+    <footer>
+      See the <a href="https://github.com/simofleanta/macro-economics-project">repository</a> for the
+      data-collection and analysis scripts, and <code>README.md</code> for methodology and data sources.
+    </footer>
+  </div>
+</body>
+</html>

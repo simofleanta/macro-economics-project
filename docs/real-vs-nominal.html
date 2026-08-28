@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Real vs Nominal Returns</title>
+</head>
+<body>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --surface-2:      #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --axis:           #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-1:       #2a78d6; /* nominal */
+    --series-2:       #eb6834; /* real */
+    --good:           #006300;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --surface-2:      #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #2c2c2a;
+      --axis:           #383835;
+      --border:         rgba(255,255,255,0.10);
+      --series-1:       #3987e5;
+      --series-2:       #d95926;
+      --good:           #0ca30c;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --surface-2:      #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --axis:           #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-1:       #3987e5;
+    --series-2:       #d95926;
+    --good:           #0ca30c;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .viz-root {
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 28px 20px 60px;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .subtitle { color: var(--text-secondary); font-size: 14px; line-height: 1.5; margin: 0 0 24px; max-width: 720px; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 28px; }
+  .stat-tile {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+  .stat-value { font-size: 28px; font-weight: 700; line-height: 1.1; }
+  .stat-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
+
+  section { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 20px 20px 12px; margin-bottom: 20px; }
+  .section-title { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+  .section-sub { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 14px; }
+
+  .legend { display: flex; gap: 18px; align-items: center; margin-bottom: 10px; font-size: 12.5px; color: var(--text-secondary); }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  .swatch.nominal { background: var(--series-1); }
+  .swatch.real { background: var(--series-2); }
+
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .axis-label { fill: var(--text-muted); font-size: 10.5px; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .baseline { stroke: var(--axis); stroke-width: 1; }
+  .ref-line { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3 3; }
+
+  .facets { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .facet { border: 1px solid var(--border); border-radius: 10px; padding: 14px 14px 8px; background: var(--surface-1); position: relative; }
+  .facet-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .facet-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+
+  .tooltip {
+    position: absolute; pointer-events: none; background: var(--text-primary); color: var(--surface-1);
+    font-size: 11.5px; padding: 6px 9px; border-radius: 6px; line-height: 1.5; white-space: nowrap;
+    opacity: 0; transform: translate(-50%, -100%); transition: opacity 0.08s; z-index: 5;
+  }
+
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+  table.data-table th, table.data-table td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--grid); }
+  table.data-table th:first-child, table.data-table td:first-child { text-align: left; }
+  table.data-table th { color: var(--text-secondary); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.02em; }
+  table.data-table td.gap { color: var(--text-secondary); }
+
+  footer { font-size: 12px; color: var(--text-muted); line-height: 1.6; max-width: 760px; padding-top: 4px; }
+  footer a { color: inherit; }
+</style>
+
+<div class="viz-root">
+  <div class="wrap">
+    <h1>How much of the BVB stock gains are real — and how much is just inflation?</h1>
+    <p class="subtitle">
+      A stock's nominal price can climb a lot, but if prices across the economy climb just as fast, your
+      purchasing power isn't really growing. The charts below compare <strong>nominal return</strong>
+      (the price gain as it appears on the exchange) with <strong>real return</strong> (that same gain, adjusted for
+      Romania's inflation) for 5 BVB-listed stocks, August 2021 – December 2025.
+    </p>
+
+    <div class="stats-row">
+      <div class="stat-tile">
+        <div class="stat-label">Cumulative inflation, Aug 2021 – Dec 2025</div>
+        <div class="stat-value">+44.0%</div>
+        <div class="stat-note">1,000 RON from August 2021 buys about as much as ~694 RON does today.</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label">Average nominal – real gap (5 stocks)</div>
+        <div class="stat-value">93 percentage points</div>
+        <div class="stat-note">That's roughly how much of the headline stock-market gain was "eaten" by inflation, on average.</div>
+      </div>
+    </div>
+
+    <section>
+      <div class="section-title">Cumulative gain by stock</div>
+      <div class="section-sub">August 2021 – December 2025</div>
+      <div class="legend">
+        <div class="legend-item"><span class="swatch nominal"></span>Nominal (exchange price)</div>
+        <div class="legend-item"><span class="swatch real"></span>Real (inflation-adjusted)</div>
+      </div>
+      <div style="position:relative;">
+        <svg id="bar-chart" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="tooltip" id="bar-tooltip"></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">Monthly price evolution (indexed, August 2021 = 100)</div>
+      <div class="section-sub">dashed line = the "no real gain" threshold</div>
+      <div class="legend">
+        <div class="legend-item"><span class="swatch nominal"></span>Nominal</div>
+        <div class="legend-item"><span class="swatch real"></span>Real (inflation-adjusted)</div>
+      </div>
+      <div class="facets" id="facets"></div>
+    </section>
+
+    <section>
+      <div class="section-title">Summary</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Symbol</th><th>Nominal</th><th>Real</th><th>Gap</th></tr>
+        </thead>
+        <tbody id="summary-body"></tbody>
+      </table>
+    </section>
+
+    <footer>
+      Sources: prices &amp; volume — Yahoo Finance (daily, converted to last trading day of the month); inflation —
+      Eurostat, Harmonised Index of Consumer Prices (HICP), Romania, base 2015=100. Inflation data has a
+      ~2-month reporting lag, which is why the series stops at December 2025 even though stock prices continue further.
+      Real return = nominal return divided by the growth in the HICP index over the same period.
+    </footer>
+  </div>
+</div>
+
+<script>
+const DATA = {"EL": {"months": ["2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "nominal_idx": [100.0, 99.14, 101.72, 85.36, 87.27, 88.9, 84.31, 80.0, 78.28, 78.66, 79.81, 75.02, 72.44, 56.36, 59.71, 69.0, 74.16, 75.5, 82.97, 79.81, 80.86, 78.95, 78.95, 85.45, 88.33, 92.06, 89.19, 90.91, 106.7, 105.93, 108.71, 123.83, 123.83, 129.47, 145.84, 152.34, 137.42, 128.23, 119.43, 115.6, 123.73, 131.39, 138.85, 120.29, 122.01, 142.49, 139.43, 170.14, 176.94, 184.59, 228.52, 226.7, 249.86], "real_idx": [100.0, 98.32, 99.56, 83.34, 84.77, 85.16, 79.92, 74.39, 71.1, 70.58, 71.06, 66.5, 63.92, 49.28, 51.51, 58.78, 63.11, 63.75, 69.37, 66.17, 66.52, 64.64, 64.33, 69.53, 71.32, 73.72, 71.01, 72.46, 84.85, 83.33, 84.85, 96.22, 95.88, 100.22, 112.82, 117.17, 105.39, 97.95, 90.58, 87.4, 93.31, 98.17, 103.04, 88.96, 90.05, 104.65, 101.96, 122.77, 125.05, 129.82, 159.83, 157.78, 173.52], "final_nominal_pct": 149.9, "final_real_pct": 73.5}, "SNG": {"months": ["2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "nominal_idx": [100.0, 109.54, 117.56, 105.73, 122.9, 119.47, 121.37, 126.34, 141.98, 141.98, 158.78, 163.36, 152.29, 136.26, 130.53, 136.26, 128.63, 136.64, 137.79, 135.11, 132.06, 138.55, 150.76, 150.0, 149.62, 166.03, 168.32, 177.1, 185.11, 188.93, 184.73, 207.25, 193.89, 200.38, 220.23, 219.08, 212.6, 205.34, 200.38, 184.35, 189.69, 199.62, 217.94, 221.76, 219.85, 252.29, 258.78, 300.38, 301.53, 321.76, 361.07, 361.07, 377.48], "real_idx": [100.0, 108.64, 115.06, 103.22, 119.37, 114.44, 115.06, 117.48, 128.96, 127.41, 141.37, 144.79, 134.38, 119.13, 112.6, 116.09, 109.46, 115.38, 115.21, 112.02, 108.65, 113.43, 122.86, 122.05, 120.81, 132.96, 134.02, 141.16, 147.21, 148.62, 144.19, 161.05, 150.13, 155.11, 170.37, 168.5, 163.05, 156.85, 151.99, 139.38, 143.05, 149.15, 161.73, 164.0, 162.26, 185.29, 189.24, 216.75, 213.11, 226.28, 252.54, 251.31, 262.15], "final_nominal_pct": 277.5, "final_real_pct": 162.1}, "SNN": {"months": ["2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "nominal_idx": [100.0, 127.94, 144.32, 144.83, 157.22, 154.71, 138.33, 147.7, 150.02, 151.69, 157.45, 163.57, 156.89, 148.68, 140.65, 148.49, 149.74, 154.99, 152.2, 159.16, 160.05, 179.81, 170.3, 172.02, 179.63, 186.31, 173.74, 181.58, 187.47, 188.26, 180.23, 188.26, 187.84, 190.86, 188.77, 193.97, 183.81, 174.52, 178.05, 165.66, 171.65, 168.54, 173.09, 163.81, 166.5, 181.76, 182.23, 202.23, 203.34, 200.28, 209.51, 224.45, 241.62], "real_idx": [100.0, 126.88, 141.25, 141.39, 152.7, 148.2, 131.13, 137.34, 136.26, 136.12, 140.19, 144.98, 138.44, 129.98, 121.33, 126.51, 127.43, 130.87, 127.27, 131.96, 131.67, 147.22, 138.78, 139.97, 145.04, 149.2, 138.33, 144.73, 149.09, 148.09, 140.68, 146.29, 145.45, 147.74, 146.03, 149.18, 140.97, 133.31, 135.05, 125.25, 129.44, 125.93, 128.44, 121.14, 122.88, 133.49, 133.26, 145.92, 143.71, 140.85, 146.54, 156.22, 167.8], "final_nominal_pct": 141.6, "final_real_pct": 67.8}, "SNP": {"months": ["2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "nominal_idx": [100.0, 104.35, 113.04, 104.35, 113.04, 108.7, 104.35, 108.7, 108.7, 113.04, 121.74, 143.48, 139.13, 121.74, 130.43, 134.78, 121.74, 134.78, 139.13, 134.78, 143.48, 156.52, 156.52, 169.57, 169.57, 195.65, 182.61, 182.61, 195.65, 200.0, 208.7, 230.43, 234.78, 256.52, 278.26, 286.96, 282.61, 273.91, 278.26, 269.57, 269.57, 273.91, 282.61, 278.26, 269.57, 286.96, 304.35, 313.04, 339.13, 352.17, 378.26, 378.26, 408.7], "real_idx": [100.0, 103.49, 110.65, 101.87, 109.8, 104.12, 98.92, 101.07, 98.72, 101.44, 108.4, 127.17, 122.77, 106.43, 112.52, 114.83, 103.6, 113.81, 116.34, 111.75, 118.04, 128.15, 127.55, 137.98, 136.91, 156.68, 145.4, 145.55, 155.59, 157.32, 162.9, 179.07, 181.8, 198.56, 215.26, 220.7, 216.75, 209.23, 211.06, 203.8, 203.28, 204.66, 209.72, 205.79, 198.95, 210.75, 222.56, 225.88, 239.68, 247.67, 264.57, 263.27, 283.82], "final_nominal_pct": 308.7, "final_real_pct": 183.8}, "TLV": {"months": ["2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "nominal_idx": [100.0, 102.43, 95.91, 94.84, 98.64, 100.39, 97.47, 93.29, 90.95, 96.69, 89.79, 88.91, 89.79, 75.39, 76.75, 90.76, 89.88, 89.59, 88.81, 88.04, 86.48, 85.31, 93.58, 104.96, 107.0, 112.55, 119.46, 123.25, 130.16, 133.37, 139.49, 149.32, 152.33, 167.41, 178.4, 185.7, 184.05, 177.04, 180.84, 168.97, 172.86, 175.78, 183.07, 183.07, 180.25, 192.02, 209.44, 222.86, 221.21, 226.07, 225.29, 241.25, 248.25], "real_idx": [100.0, 101.59, 93.88, 92.6, 95.81, 96.16, 92.4, 86.75, 82.61, 86.76, 79.94, 78.81, 79.23, 65.91, 66.21, 77.32, 76.49, 75.65, 74.26, 72.99, 71.15, 69.85, 76.26, 85.41, 86.4, 90.13, 95.11, 98.24, 103.51, 104.91, 108.88, 116.03, 117.96, 129.59, 138.01, 142.82, 141.16, 135.24, 137.16, 127.75, 130.36, 131.34, 135.86, 135.4, 133.04, 141.03, 153.15, 160.81, 156.34, 158.99, 157.58, 167.91, 172.4], "final_nominal_pct": 148.2, "final_real_pct": 72.4}};
+
+const SERIES1 = getComputedStyleVar('--series-1');
+const SERIES2 = getComputedStyleVar('--series-2');
+
+function getComputedStyleVar(name) {
+  return getComputedStyle(document.querySelector('.viz-root')).getPropertyValue(name).trim();
+}
+
+const ORDER = ['SNP','SNG','EL','TLV','SNN'];
+const NAMES = { SNP: 'OMV Petrom', SNG: 'Romgaz', EL: 'Electrica', TLV: 'Banca Transilvania', SNN: 'Nuclearelectrica' };
+
+// ---------- Bar chart ----------
+(function renderBarChart(){
+  const svg = document.getElementById('bar-chart');
+  const tooltip = document.getElementById('bar-tooltip');
+  const W = 640, H = 300, ML = 44, MR = 10, MT = 16, MB = 34;
+  const plotW = W - ML - MR, plotH = H - MT - MB;
+  const yMax = 450;
+  const groupW = plotW / ORDER.length;
+  const barW = 34, gap = 6;
+
+  const ns = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs) {
+    const e = document.createElementNS(ns, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  // gridlines
+  for (let v = 0; v <= yMax; v += 100) {
+    const y = MT + plotH - (v / yMax) * plotH;
+    svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: y, y2: y, class: v === 0 ? 'baseline' : 'grid-line' }));
+    const t = el('text', { x: ML - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+    t.textContent = (v === 0 ? '0' : '+' + v) + '%';
+    svg.appendChild(t);
+  }
+
+  ORDER.forEach((sym, i) => {
+    const d = DATA[sym];
+    const cx = ML + i * groupW + groupW / 2;
+    const bars = [
+      { val: d.final_nominal_pct, color: SERIES1, x: cx - barW - gap / 2 },
+      { val: d.final_real_pct, color: SERIES2, x: cx + gap / 2 },
+    ];
+    bars.forEach(b => {
+      const h = (b.val / yMax) * plotH;
+      const y = MT + plotH - h;
+      const rect = el('rect', { x: b.x, y, width: barW, height: h, rx: 4, fill: b.color });
+      rect.addEventListener('mousemove', (ev) => showTip(ev, `${NAMES[sym]}<br>${b.val > 0 ? '+' : ''}${b.val.toFixed(1)}%`));
+      rect.addEventListener('mouseleave', hideTip);
+      svg.appendChild(rect);
+
+      const lbl = el('text', { x: b.x + barW / 2, y: y - 6, class: 'axis-label', 'text-anchor': 'middle' });
+      lbl.textContent = (b.val > 0 ? '+' : '') + b.val.toFixed(0) + '%';
+      lbl.style.fill = 'var(--text-secondary)';
+      svg.appendChild(lbl);
+    });
+    const catLabel = el('text', { x: cx, y: H - MB + 18, class: 'axis-label', 'text-anchor': 'middle' });
+    catLabel.textContent = sym;
+    catLabel.style.fontWeight = '600';
+    catLabel.style.fill = 'var(--text-primary)';
+    svg.appendChild(catLabel);
+  });
+
+  function showTip(ev, html) {
+    const rect = svg.getBoundingClientRect();
+    tooltip.innerHTML = html;
+    tooltip.style.left = (ev.clientX - rect.left) + 'px';
+    tooltip.style.top = (ev.clientY - rect.top - 10) + 'px';
+    tooltip.style.opacity = '1';
+  }
+  function hideTip() { tooltip.style.opacity = '0'; }
+})();
+
+// ---------- Line chart small multiples ----------
+(function renderFacets(){
+  const container = document.getElementById('facets');
+  const ns = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs) {
+    const e = document.createElementNS(ns, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  ORDER.forEach(sym => {
+    const d = DATA[sym];
+    const months = d.months, nom = d.nominal_idx, real = d.real_idx;
+    const n = months.length;
+
+    const facet = document.createElement('div');
+    facet.className = 'facet';
+    facet.innerHTML = `<div class="facet-title">${sym} <span style="font-weight:400;color:var(--text-muted);">— ${NAMES[sym]}</span></div>
+      <div class="facet-sub">nominal ${d.final_nominal_pct>0?'+':''}${d.final_nominal_pct.toFixed(0)}% &nbsp;·&nbsp; real ${d.final_real_pct>0?'+':''}${d.final_real_pct.toFixed(0)}%</div>`;
+    container.appendChild(facet);
+
+    const W = 400, H = 200, ML = 32, MR = 8, MT = 10, MB = 20;
+    const plotW = W - ML - MR, plotH = H - MT - MB;
+
+    const allVals = nom.concat(real);
+    let yMin = Math.min(...allVals, 100), yMax = Math.max(...allVals, 100);
+    const pad = (yMax - yMin) * 0.08 || 5;
+    yMin = Math.floor((yMin - pad) / 10) * 10;
+    yMax = Math.ceil((yMax + pad) / 10) * 10;
+
+    const xAt = i => ML + (i / (n - 1)) * plotW;
+    const yAt = v => MT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: 'xMidYMid meet' });
+
+    // gridlines (3)
+    const steps = 3;
+    for (let s = 0; s <= steps; s++) {
+      const v = yMin + (s / steps) * (yMax - yMin);
+      const y = yAt(v);
+      svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: y, y2: y, class: 'grid-line' }));
+      const t = el('text', { x: ML - 6, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+      t.textContent = Math.round(v);
+      svg.appendChild(t);
+    }
+
+    // reference line at 100
+    if (100 >= yMin && 100 <= yMax) {
+      svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: yAt(100), y2: yAt(100), class: 'ref-line' }));
+    }
+
+    // x ticks: Jan of each year + first month
+    months.forEach((m, i) => {
+      if (m.endsWith('-01') || i === 0) {
+        const x = xAt(i);
+        const t = el('text', { x, y: H - MB + 14, class: 'axis-label', 'text-anchor': 'middle' });
+        t.textContent = m.slice(0, 4);
+        svg.appendChild(t);
+      }
+    });
+
+    function path(vals, color) {
+      let d = '';
+      vals.forEach((v, i) => { d += (i === 0 ? 'M' : 'L') + xAt(i).toFixed(1) + ' ' + yAt(v).toFixed(1) + ' '; });
+      svg.appendChild(el('path', { d, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+    }
+    path(nom, SERIES1);
+    path(real, SERIES2);
+
+    // hover crosshair
+    const hoverLine = el('line', { x1: 0, x2: 0, y1: MT, y2: MT + plotH, class: 'ref-line', opacity: 0 });
+    svg.appendChild(hoverLine);
+    const dotNom = el('circle', { r: 3.5, fill: SERIES1, opacity: 0 });
+    const dotReal = el('circle', { r: 3.5, fill: SERIES2, opacity: 0 });
+    svg.appendChild(dotNom); svg.appendChild(dotReal);
+
+    const overlay = el('rect', { x: ML, y: MT, width: plotW, height: plotH, fill: 'transparent' });
+    svg.appendChild(overlay);
+    facet.appendChild(svg);
+
+    const tip = document.createElement('div');
+    tip.className = 'tooltip';
+    facet.appendChild(tip);
+
+    overlay.addEventListener('mousemove', (ev) => {
+      const rect = svg.getBoundingClientRect();
+      const px = (ev.clientX - rect.left) / rect.width * W;
+      let i = Math.round(((px - ML) / plotW) * (n - 1));
+      i = Math.max(0, Math.min(n - 1, i));
+      const x = xAt(i);
+      hoverLine.setAttribute('x1', x); hoverLine.setAttribute('x2', x); hoverLine.setAttribute('opacity', 1);
+      dotNom.setAttribute('cx', x); dotNom.setAttribute('cy', yAt(nom[i])); dotNom.setAttribute('opacity', 1);
+      dotReal.setAttribute('cx', x); dotReal.setAttribute('cy', yAt(real[i])); dotReal.setAttribute('opacity', 1);
+      tip.innerHTML = `${months[i]}<br>nominal: ${nom[i].toFixed(0)}<br>real: ${real[i].toFixed(0)}`;
+      const facetRect = facet.getBoundingClientRect();
+      tip.style.left = (ev.clientX - facetRect.left) + 'px';
+      tip.style.top = (ev.clientY - facetRect.top - 10) + 'px';
+      tip.style.opacity = '1';
+    });
+    overlay.addEventListener('mouseleave', () => {
+      hoverLine.setAttribute('opacity', 0);
+      dotNom.setAttribute('opacity', 0);
+      dotReal.setAttribute('opacity', 0);
+      tip.style.opacity = '0';
+    });
+  });
+})();
+
+// ---------- Summary table ----------
+(function renderTable(){
+  const body = document.getElementById('summary-body');
+  ORDER.forEach(sym => {
+    const d = DATA[sym];
+    const gap = (d.final_nominal_pct - d.final_real_pct).toFixed(1);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${sym} — ${NAMES[sym]}</td><td>+${d.final_nominal_pct.toFixed(1)}%</td><td>+${d.final_real_pct.toFixed(1)}%</td><td class="gap">${gap} pp</td>`;
+    body.appendChild(tr);
+  });
+})();
+</script>
+</body>
+</html>

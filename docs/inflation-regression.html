@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inflation-Return Regression</title>
+</head>
+<body>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --surface-2:      #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --axis:           #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-1:       #2a78d6; /* nominal */
+    --series-2:       #eb6834; /* real */
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --surface-2:      #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #2c2c2a;
+      --axis:           #383835;
+      --border:         rgba(255,255,255,0.10);
+      --series-1:       #3987e5;
+      --series-2:       #d95926;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --surface-2:      #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --axis:           #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-1:       #3987e5;
+    --series-2:       #d95926;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .viz-root {
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 28px 20px 60px;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .subtitle { color: var(--text-secondary); font-size: 14px; line-height: 1.5; margin: 0 0 24px; max-width: 760px; }
+
+  section { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 20px 20px 12px; margin-bottom: 20px; }
+  .section-title { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+  .section-sub { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 14px; }
+
+  .legend { display: flex; gap: 18px; align-items: center; margin-bottom: 10px; font-size: 12.5px; color: var(--text-secondary); }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  .swatch.nominal { background: var(--series-1); }
+  .swatch.real { background: var(--series-2); }
+
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .axis-label { fill: var(--text-muted); font-size: 10.5px; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .baseline { stroke: var(--axis); stroke-width: 1; }
+  .ref-line { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3 3; }
+
+  .scatter-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+  .panel { border: 1px solid var(--border); border-radius: 10px; padding: 14px 14px 8px; position: relative; }
+  .panel-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .panel-sub { font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px; }
+  .stat-badge { font-size: 11.5px; color: var(--text-secondary); }
+  .stat-badge b { color: var(--text-primary); }
+
+  .tooltip {
+    position: absolute; pointer-events: none; background: var(--text-primary); color: var(--surface-1);
+    font-size: 11.5px; padding: 6px 9px; border-radius: 6px; line-height: 1.5; white-space: nowrap;
+    opacity: 0; transform: translate(-50%, -100%); transition: opacity 0.08s; z-index: 5;
+  }
+
+  footer { font-size: 12px; color: var(--text-muted); line-height: 1.6; max-width: 780px; padding-top: 4px; }
+</style>
+
+<div class="viz-root">
+  <div class="wrap">
+    <h1>Return vs. inflation — where the statistical relationship shows up, and why it disappears</h1>
+    <p class="subtitle">
+      Simple linear regression: each stock's annual return (Dec-to-Dec), compared with that year's average
+      inflation rate. The panels below show the relationship over the last 5 years (2021-2025, the only window
+      where it comes out statistically significant), plus a chart showing why it disappears once more years are added.
+    </p>
+
+    <section>
+      <div class="section-title">Annual return vs. average annual inflation</div>
+      <div class="section-sub">2021-2025 · 5 stocks × 5 years = 25 observations</div>
+      <div class="legend">
+        <div class="legend-item"><span class="swatch nominal"></span>Nominal</div>
+        <div class="legend-item"><span class="swatch real"></span>Real (inflation-adjusted)</div>
+      </div>
+      <div class="scatter-row" id="scatter-row"></div>
+    </section>
+
+    <section>
+      <div class="section-title">Why the time horizon matters</div>
+      <div class="section-sub">regression p-value, as a function of how many prior years are included (counting back from 2025)</div>
+      <div class="legend">
+        <div class="legend-item"><span class="swatch nominal"></span>Nominal</div>
+        <div class="legend-item"><span class="swatch real"></span>Real (inflation-adjusted)</div>
+      </div>
+      <div style="position:relative;">
+        <svg id="sensitivity-chart" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="tooltip" id="sens-tooltip"></div>
+      </div>
+    </section>
+
+    <footer>
+      OLS regression (scipy.stats.linregress). Each point = one stock-year observation; the line is the regression
+      fit through those points. The conventional significance threshold is p &lt; 0.05 (dashed line in the second chart).
+      Once 6+ years are included, the relationship no longer clears that threshold — the 2021-2025 signal is
+      dominated by the 2022 inflation shock, not a stable long-term pattern.
+    </footer>
+  </div>
+</div>
+
+<script>
+const RD = {"scatter_points": [{"symbol": "EL", "year": 2021, "avg_inflation_pct": 4.11, "nominal_ret_yr": -15.16, "real_ret_yr": -20.48}, {"symbol": "EL", "year": 2022, "avg_inflation_pct": 11.98, "nominal_ret_yr": -15.02, "real_ret_yr": -25.55}, {"symbol": "EL", "year": 2023, "avg_inflation_pct": 9.83, "nominal_ret_yr": 43.87, "real_ret_yr": 34.45}, {"symbol": "EL", "year": 2024, "avg_inflation_pct": 5.85, "nominal_ret_yr": 15.96, "real_ret_yr": 9.97}, {"symbol": "EL", "year": 2025, "avg_inflation_pct": 6.75, "nominal_ret_yr": 101.93, "real_ret_yr": 85.96}, {"symbol": "SNG", "year": 2021, "avg_inflation_pct": 4.11, "nominal_ret_yr": 47.03, "real_ret_yr": 37.82}, {"symbol": "SNG", "year": 2022, "avg_inflation_pct": 11.98, "nominal_ret_yr": 4.66, "real_ret_yr": -8.31}, {"symbol": "SNG", "year": 2023, "avg_inflation_pct": 9.83, "nominal_ret_yr": 43.92, "real_ret_yr": 34.49}, {"symbol": "SNG", "year": 2024, "avg_inflation_pct": 5.85, "nominal_ret_yr": 2.47, "real_ret_yr": -2.83}, {"symbol": "SNG", "year": 2025, "avg_inflation_pct": 6.75, "nominal_ret_yr": 98.99, "real_ret_yr": 83.25}, {"symbol": "SNN", "year": 2021, "avg_inflation_pct": 4.11, "nominal_ret_yr": 178.85, "real_ret_yr": 161.38}, {"symbol": "SNN", "year": 2022, "avg_inflation_pct": 11.98, "nominal_ret_yr": -4.75, "real_ret_yr": -16.55}, {"symbol": "SNN", "year": 2023, "avg_inflation_pct": 9.83, "nominal_ret_yr": 25.19, "real_ret_yr": 16.99}, {"symbol": "SNN", "year": 2024, "avg_inflation_pct": 5.85, "nominal_ret_yr": -8.44, "real_ret_yr": -13.18}, {"symbol": "SNN", "year": 2025, "avg_inflation_pct": 6.75, "nominal_ret_yr": 40.77, "real_ret_yr": 29.63}, {"symbol": "SNP", "year": 2021, "avg_inflation_pct": 4.11, "nominal_ret_yr": 44.44, "real_ret_yr": 35.4}, {"symbol": "SNP", "year": 2022, "avg_inflation_pct": 11.98, "nominal_ret_yr": 7.69, "real_ret_yr": -5.65}, {"symbol": "SNP", "year": 2023, "avg_inflation_pct": 9.83, "nominal_ret_yr": 60.71, "real_ret_yr": 50.19}, {"symbol": "SNP", "year": 2024, "avg_inflation_pct": 5.85, "nominal_ret_yr": 37.78, "real_ret_yr": 30.65}, {"symbol": "SNP", "year": 2025, "avg_inflation_pct": 6.75, "nominal_ret_yr": 51.61, "real_ret_yr": 39.62}, {"symbol": "TLV", "year": 2021, "avg_inflation_pct": 4.11, "nominal_ret_yr": 30.0, "real_ret_yr": 21.86}, {"symbol": "TLV", "year": 2022, "avg_inflation_pct": 11.98, "nominal_ret_yr": -8.88, "real_ret_yr": -20.16}, {"symbol": "TLV", "year": 2023, "avg_inflation_pct": 9.83, "nominal_ret_yr": 44.81, "real_ret_yr": 35.32}, {"symbol": "TLV", "year": 2024, "avg_inflation_pct": 5.85, "nominal_ret_yr": 32.81, "real_ret_yr": 25.94}, {"symbol": "TLV", "year": 2025, "avg_inflation_pct": 6.75, "nominal_ret_yr": 43.61, "real_ret_yr": 32.25}], "nominal_line": {"x": [4.108333333333333, 11.975], "y": [55.954297703228804, 12.696029270268582], "slope": -5.499, "intercept": 78.546, "r2": 0.136, "p": 0.0694}, "real_line": {"x": [4.108333333333333, 11.975], "y": [46.94696314442885, 1.306051188088503], "slope": -5.802, "intercept": 70.783, "r2": 0.168, "p": 0.0421}, "sensitivity": [{"k": 4, "years": "2022-2025", "n": 20, "p_nominal": 0.0783, "p_real": 0.0425, "r2_nominal": 0.162, "r2_real": 0.209}, {"k": 5, "years": "2021-2025", "n": 25, "p_nominal": 0.0694, "p_real": 0.0421, "r2_nominal": 0.136, "r2_real": 0.168}, {"k": 6, "years": "2020-2025", "n": 30, "p_nominal": 0.5634, "p_real": 0.3369, "r2_nominal": 0.012, "r2_real": 0.033}, {"k": 7, "years": "2019-2025", "n": 35, "p_nominal": 0.3502, "p_real": 0.1695, "r2_nominal": 0.026, "r2_real": 0.056}, {"k": 8, "years": "2018-2025", "n": 39, "p_nominal": 0.3636, "p_real": 0.1652, "r2_nominal": 0.022, "r2_real": 0.051}, {"k": 9, "years": "2017-2025", "n": 43, "p_nominal": 0.4336, "p_real": 0.1851, "r2_nominal": 0.015, "r2_real": 0.042}, {"k": 10, "years": "2016-2025", "n": 47, "p_nominal": 0.9212, "p_real": 0.6014, "r2_nominal": 0.0, "r2_real": 0.006}]};
+
+function cssVar(name) {
+  return getComputedStyle(document.querySelector('.viz-root')).getPropertyValue(name).trim();
+}
+const SERIES1 = cssVar('--series-1');
+const SERIES2 = cssVar('--series-2');
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(tag, attrs) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+// ---------- Scatter panels (nominal, real) ----------
+function renderScatter(container, points, yKey, line, color, title, sub) {
+  const panel = document.createElement('div');
+  panel.className = 'panel';
+  panel.innerHTML = `<div class="panel-title">${title}</div>
+    <div class="panel-sub">${sub}</div>
+    <div class="stat-badge">R² = <b>${line.r2.toFixed(3)}</b> &nbsp;·&nbsp; p-value = <b>${line.p.toFixed(3)}</b> ${line.p < 0.05 ? '(significant)' : ''}</div>`;
+  container.appendChild(panel);
+
+  const W = 400, H = 260, ML = 40, MR = 10, MT = 14, MB = 30;
+  const plotW = W - ML - MR, plotH = H - MT - MB;
+
+  const xs = points.map(p => p.avg_inflation_pct);
+  const ys = points.map(p => p[yKey]);
+  let xMin = Math.min(...xs), xMax = Math.max(...xs);
+  let yMin = Math.min(...ys, 0), yMax = Math.max(...ys);
+  const xPad = (xMax - xMin) * 0.1, yPad = (yMax - yMin) * 0.1;
+  xMin -= xPad; xMax += xPad; yMin -= yPad; yMax += yPad;
+
+  const xAt = v => ML + ((v - xMin) / (xMax - xMin)) * plotW;
+  const yAt = v => MT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: 'xMidYMid meet' });
+
+  // gridlines y (4 steps)
+  const ySteps = 4;
+  for (let s = 0; s <= ySteps; s++) {
+    const v = yMin + (s / ySteps) * (yMax - yMin);
+    const y = yAt(v);
+    svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: y, y2: y, class: 'grid-line' }));
+    const t = el('text', { x: ML - 6, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+    t.textContent = Math.round(v) + '%';
+    svg.appendChild(t);
+  }
+  // zero baseline
+  if (0 >= yMin && 0 <= yMax) {
+    svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: yAt(0), y2: yAt(0), class: 'baseline' }));
+  }
+  // x ticks (4 steps)
+  const xSteps = 4;
+  for (let s = 0; s <= xSteps; s++) {
+    const v = xMin + (s / xSteps) * (xMax - xMin);
+    const x = xAt(v);
+    const t = el('text', { x, y: H - MB + 16, class: 'axis-label', 'text-anchor': 'middle' });
+    t.textContent = v.toFixed(0) + '%';
+    svg.appendChild(t);
+  }
+  const xLabel = el('text', { x: ML + plotW / 2, y: H - 2, class: 'axis-label', 'text-anchor': 'middle' });
+  xLabel.textContent = 'average annual inflation';
+  svg.appendChild(xLabel);
+
+  // regression line
+  svg.appendChild(el('line', {
+    x1: xAt(line.x[0]), y1: yAt(line.y[0]), x2: xAt(line.x[1]), y2: yAt(line.y[1]),
+    stroke: color, 'stroke-width': 2, 'stroke-linecap': 'round'
+  }));
+
+  // points
+  const tip = document.createElement('div');
+  tip.className = 'tooltip';
+  panel.appendChild(tip);
+
+  points.forEach(p => {
+    const cx = xAt(p.avg_inflation_pct), cy = yAt(p[yKey]);
+    const c = el('circle', { cx, cy, r: 4, fill: color, opacity: 0.75, stroke: 'var(--surface-1)', 'stroke-width': 1 });
+    c.addEventListener('mousemove', (ev) => {
+      const rect = panel.getBoundingClientRect();
+      tip.innerHTML = `${p.symbol} · ${p.year}<br>inflation: ${p.avg_inflation_pct.toFixed(1)}%<br>return: ${p[yKey].toFixed(1)}%`;
+      tip.style.left = (ev.clientX - rect.left) + 'px';
+      tip.style.top = (ev.clientY - rect.top - 10) + 'px';
+      tip.style.opacity = '1';
+    });
+    c.addEventListener('mouseleave', () => tip.style.opacity = '0');
+    svg.appendChild(c);
+  });
+
+  panel.appendChild(svg);
+}
+
+(function () {
+  const container = document.getElementById('scatter-row');
+  renderScatter(container, RD.scatter_points, 'nominal_ret_yr', RD.nominal_line, SERIES1,
+    'Nominal', 'annual nominal return (%)');
+  renderScatter(container, RD.scatter_points, 'real_ret_yr', RD.real_line, SERIES2,
+    'Real (inflation-adjusted)', 'annual real return (%)');
+})();
+
+// ---------- Sensitivity chart ----------
+(function () {
+  const svg = document.getElementById('sensitivity-chart');
+  const tooltip = document.getElementById('sens-tooltip');
+  const data = RD.sensitivity; // array of {k, years, n, p_nominal, p_real, r2_nominal, r2_real}
+  const W = 640, H = 300, ML = 44, MR = 14, MT = 16, MB = 40;
+  const plotW = W - ML - MR, plotH = H - MT - MB;
+
+  const yMax = Math.max(1, ...data.map(d => Math.max(d.p_nominal, d.p_real))) * 1.05;
+  const xAt = i => ML + (i / (data.length - 1)) * plotW;
+  const yAt = v => MT + plotH - (v / yMax) * plotH;
+
+  // gridlines
+  [0, 0.25, 0.5, 0.75, 1.0].forEach(v => {
+    if (v > yMax) return;
+    const y = yAt(v);
+    svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: y, y2: y, class: v === 0 ? 'baseline' : 'grid-line' }));
+    const t = el('text', { x: ML - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+    t.textContent = v.toFixed(2);
+    svg.appendChild(t);
+  });
+
+  // p=0.05 reference line
+  const ySig = yAt(0.05);
+  svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: ySig, y2: ySig, class: 'ref-line' }));
+  const sigLabel = el('text', { x: W - MR, y: ySig - 5, class: 'axis-label', 'text-anchor': 'end' });
+  sigLabel.textContent = 'p = 0.05 threshold';
+  svg.appendChild(sigLabel);
+
+  // x labels
+  data.forEach((d, i) => {
+    const x = xAt(i);
+    const t = el('text', { x, y: H - MB + 16, class: 'axis-label', 'text-anchor': 'middle' });
+    t.textContent = d.k;
+    svg.appendChild(t);
+    const t2 = el('text', { x, y: H - MB + 28, class: 'axis-label', 'text-anchor': 'middle' });
+    t2.textContent = d.years;
+    t2.style.fontSize = '9px';
+    svg.appendChild(t2);
+  });
+  const xAxisLabel = el('text', { x: ML + plotW / 2, y: H - 2, class: 'axis-label', 'text-anchor': 'middle' });
+  xAxisLabel.textContent = 'last K years included in regression';
+  svg.appendChild(xAxisLabel);
+
+  function drawLine(key, color) {
+    let d = '';
+    data.forEach((pt, i) => { d += (i === 0 ? 'M' : 'L') + xAt(i).toFixed(1) + ' ' + yAt(pt[key]).toFixed(1) + ' '; });
+    svg.appendChild(el('path', { d, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+    data.forEach((pt, i) => {
+      const c = el('circle', { cx: xAt(i), cy: yAt(pt[key]), r: 4, fill: color });
+      c.addEventListener('mousemove', (ev) => {
+        const rect = svg.getBoundingClientRect();
+        tooltip.innerHTML = `${pt.years} (n=${pt.n})<br>p = ${pt[key].toFixed(4)}`;
+        tooltip.style.left = (ev.clientX - rect.left) + 'px';
+        tooltip.style.top = (ev.clientY - rect.top - 10) + 'px';
+        tooltip.style.opacity = '1';
+      });
+      c.addEventListener('mouseleave', () => tooltip.style.opacity = '0');
+      svg.appendChild(c);
+    });
+  }
+  drawLine('p_nominal', SERIES1);
+  drawLine('p_real', SERIES2);
+})();
+</script>
+</body>
+</html>
