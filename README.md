@@ -93,10 +93,13 @@ JSON files behind the dashboard in `docs/`). The steps, individually:
 ## Keeping it up to date
 
 A [GitHub Actions workflow](.github/workflows/refresh-data.yml) runs the full
-pipeline automatically on the 1st of every month (and can be triggered manually
-from the Actions tab) and commits the refreshed `docs/*-data.json` files. The
-published charts read their data from those JSON files at load time, so they
-update automatically after each run — no manual refresh needed.
+pipeline automatically every day at 06:00 Romania time (04:00 UTC — and can be
+triggered manually from the Actions tab) and commits the refreshed
+`docs/*-data.json` files. The published charts read their data from those JSON
+files at load time, so they update automatically after each run — no manual
+refresh needed. Note: inflation itself only updates monthly at the source
+(Eurostat), so daily runs mostly refresh the stock price data; the inflation
+numbers change only when Eurostat publishes a new month.
 
 ## Repository structure
 
