@@ -4,12 +4,16 @@ A small applied-macroeconomics project: how much of the stock market gains on th
 Bucharest Stock Exchange (BVB) are real, once Romania's inflation is accounted for —
 and whether inflation statistically predicts annual stock returns.
 
-## Interactive charts
+## Dashboard
 
-- **[Nominal vs. Real Returns](https://simofleanta.github.io/macro-economics-project/real-vs-nominal.html)** — cumulative and monthly nominal vs. inflation-adjusted returns for 5 BVB stocks, trailing 5 years.
-- **[Inflation-Return Regression](https://simofleanta.github.io/macro-economics-project/inflation-regression.html)** — scatter plots, regression lines, and a chart showing how statistical significance depends on the time horizon used.
+**[simofleanta.github.io/macro-economics-project](https://simofleanta.github.io/macro-economics-project/)**
+— one page, four views: company overview, price &amp; volume, monthly-returns
+heatmap, and nominal-vs-real returns with the inflation regression. Refreshes
+automatically — see [Keeping it up to date](#keeping-it-up-to-date).
 
-Both charts refresh automatically — see [Keeping it up to date](#keeping-it-up-to-date).
+The two return/regression charts are also available standalone:
+[Nominal vs. Real Returns](https://simofleanta.github.io/macro-economics-project/real-vs-nominal.html) ·
+[Inflation-Return Regression](https://simofleanta.github.io/macro-economics-project/inflation-regression.html)
 
 ## Data
 
@@ -65,7 +69,7 @@ python scripts/run_all.py
 ```
 
 runs the full pipeline in order (writes to an `output/` folder, and refreshes the
-two JSON files behind the charts in `docs/`). The steps, individually:
+JSON files behind the dashboard in `docs/`). The steps, individually:
 
 - `fetch_prices.py` — downloads stock price/volume history, saves to
   `output/BVB_historical_price_volume.xlsx` and `output/bvb.db`
@@ -78,6 +82,10 @@ two JSON files behind the charts in `docs/`). The steps, individually:
 - `build_charts_data.py` — recomputes `docs/real-vs-nominal-data.json` and
   `docs/inflation-regression-data.json` from a trailing window anchored to the
   latest available data, so the published charts stay current.
+- `build_price_volume_data.py` — recomputes `docs/price-volume-data.json`
+  (weekly close + weekly volume per stock, full history).
+- `build_heatmap_data.py` — recomputes `docs/heatmap-data.json` (month-over-month
+  price return per stock, full history).
 - `regression_analysis.py` — standalone script that prints the annual
   regression and time-horizon sensitivity table to the console (not needed for
   the charts, useful for exploring the data directly).

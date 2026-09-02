@@ -9,6 +9,8 @@ STEPS = [
     "scripts/fetch_inflation.py",
     "scripts/build_nominal_vs_real.py",
     "scripts/build_charts_data.py",
+    "scripts/build_price_volume_data.py",
+    "scripts/build_heatmap_data.py",
 ]
 
 for step in STEPS:

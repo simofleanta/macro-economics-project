@@ -3,78 +3,804 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Macro-Economics Project — BVB Stocks vs. Romanian Inflation</title>
+<title>BVB Dashboard — Stocks vs. Romanian Inflation</title>
 <style>
   :root {
-    color-scheme: light dark;
-    --bg: #f9f9f7;
-    --surface: #fcfcfb;
-    --text: #0b0b0b;
-    --muted: #52514e;
-    --border: rgba(11,11,11,0.10);
-    --link: #2a78d6;
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --surface-2:      #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --axis:           #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-1:       #2a78d6; /* price / nominal */
+    --series-2:       #eb6834; /* volume / real */
+    --div-neg:        #e34948;
+    --div-pos:        #2a78d6;
+    --div-mid:        #f0efec;
   }
   @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0d0d0d;
-      --surface: #1a1a19;
-      --text: #ffffff;
-      --muted: #c3c2b7;
-      --border: rgba(255,255,255,0.10);
-      --link: #3987e5;
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --surface-2:      #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #2c2c2a;
+      --axis:           #383835;
+      --border:         rgba(255,255,255,0.10);
+      --series-1:       #3987e5;
+      --series-2:       #d95926;
+      --div-neg:        #e66767;
+      --div-pos:        #3987e5;
+      --div-mid:        #383835;
     }
   }
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --surface-2:      #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --axis:           #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-1:       #3987e5;
+    --series-2:       #d95926;
+    --div-neg:        #e66767;
+    --div-pos:        #3987e5;
+    --div-mid:        #383835;
+  }
+
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: var(--bg);
-    color: var(--text);
+    background: var(--surface-2);
+    color: var(--text-primary);
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    padding: 48px 20px;
   }
-  .wrap { max-width: 720px; margin: 0 auto; }
-  h1 { font-size: 24px; margin: 0 0 8px; }
-  p.lead { color: var(--muted); font-size: 15px; line-height: 1.6; margin: 0 0 32px; }
-  .card {
-    display: block;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px 22px;
-    margin-bottom: 14px;
-    text-decoration: none;
-    color: inherit;
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 28px 20px 80px; }
+  h1 { font-size: 24px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .subtitle { color: var(--text-secondary); font-size: 14px; line-height: 1.5; margin: 0 0 20px; max-width: 720px; }
+
+  nav.toc {
+    position: sticky; top: 0; z-index: 10; background: var(--surface-2);
+    display: flex; gap: 4px; flex-wrap: wrap; padding: 10px 0; margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
   }
-  .card h2 { font-size: 16px; margin: 0 0 6px; color: var(--link); }
-  .card p { font-size: 13.5px; color: var(--muted); margin: 0; line-height: 1.5; }
-  footer { margin-top: 40px; font-size: 12.5px; color: var(--muted); }
-  footer a { color: var(--link); }
+  nav.toc a {
+    font-size: 12.5px; color: var(--text-secondary); text-decoration: none;
+    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border);
+  }
+  nav.toc a:hover { color: var(--text-primary); border-color: var(--text-muted); }
+
+  section { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 20px 20px 12px; margin-bottom: 20px; scroll-margin-top: 56px; }
+  .section-title { font-size: 17px; font-weight: 700; margin: 0 0 2px; }
+  .section-sub { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 14px; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .card { border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .card .sym { font-size: 15px; font-weight: 700; }
+  .card .name { font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px; }
+  .card .price { font-size: 20px; font-weight: 700; }
+  .card .chg { font-size: 12px; margin-top: 2px; }
+  .chg.up { color: var(--series-1); }
+  .chg.down { color: var(--div-neg); }
+
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat-tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+  .stat-value { font-size: 26px; font-weight: 700; line-height: 1.1; }
+  .stat-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
+
+  .legend { display: flex; gap: 18px; align-items: center; margin-bottom: 10px; font-size: 12px; color: var(--text-secondary); }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  .swatch.nominal, .swatch.price { background: var(--series-1); }
+  .swatch.real, .swatch.volume { background: var(--series-2); }
+
+  .legend-bar { width: 200px; height: 12px; border-radius: 6px; background: linear-gradient(to right, var(--div-neg), var(--div-mid), var(--div-pos)); border: 1px solid var(--border); }
+  .legend-ticks { display: flex; justify-content: space-between; width: 200px; font-size: 10.5px; color: var(--text-muted); }
+
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .axis-label { fill: var(--text-muted); font-size: 10px; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .baseline { stroke: var(--axis); stroke-width: 1; }
+  .ref-line, .crosshair { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3 3; }
+
+  .stock-block { border: 1px solid var(--border); border-radius: 10px; padding: 14px 14px 8px; margin-bottom: 14px; position: relative; }
+  .stock-block:last-child { margin-bottom: 0; }
+  .stock-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .stock-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+
+  .facets { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .facet { border: 1px solid var(--border); border-radius: 10px; padding: 14px 14px 8px; position: relative; }
+  .facet-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .facet-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+
+  .heat-scroll { overflow-x: auto; }
+  table.heat { border-collapse: separate; border-spacing: 3px; font-size: 11px; }
+  table.heat th { font-weight: 600; color: var(--text-muted); font-size: 10.5px; padding: 2px 4px; }
+  table.heat th.year-label { text-align: right; color: var(--text-secondary); font-weight: 600; padding-right: 8px; }
+  table.heat td { width: 30px; height: 22px; border-radius: 4px; text-align: center; cursor: default; box-shadow: inset 0 0 0 1px var(--border); }
+  table.heat td.empty { background: transparent; box-shadow: none; }
+
+  details { margin-top: 8px; }
+  summary { font-size: 12px; color: var(--text-secondary); cursor: pointer; }
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-top: 10px; }
+  table.data-table th, table.data-table td { text-align: right; padding: 4px 8px; border-bottom: 1px solid var(--border); }
+  table.data-table th:first-child, table.data-table td:first-child { text-align: left; }
+
+  .scatter-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+  .panel { border: 1px solid var(--border); border-radius: 10px; padding: 14px 14px 8px; position: relative; }
+  .panel-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .panel-sub { font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px; }
+  .stat-badge { font-size: 11.5px; color: var(--text-secondary); }
+  .stat-badge b { color: var(--text-primary); }
+
+  .tooltip {
+    position: absolute; pointer-events: none; background: var(--text-primary); color: var(--surface-1);
+    font-size: 11.5px; padding: 6px 9px; border-radius: 6px; line-height: 1.5; white-space: nowrap;
+    opacity: 0; transform: translate(-50%, -100%); transition: opacity 0.06s; z-index: 5;
+  }
+
+  footer { font-size: 12px; color: var(--text-muted); line-height: 1.6; max-width: 780px; padding: 8px 0 0; }
+  footer a { color: inherit; }
 </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>BVB Stocks vs. Romanian Inflation</h1>
-    <p class="lead">
-      A small macroeconomics project comparing nominal stock returns on the Bucharest Stock Exchange (BVB)
-      against Romania's inflation-adjusted ("real") returns, and testing whether inflation statistically
-      predicts annual stock performance.
+    <h1>BVB Dashboard</h1>
+    <p class="subtitle">
+      Stocks vs. Romanian inflation — one page, four views. Data refreshes automatically every month.
+      See the <a href="https://github.com/simofleanta/macro-economics-project">repository</a> for the code.
     </p>
 
-    <a class="card" href="real-vs-nominal.html">
-      <h2>Chart 1 — Nominal vs. Real Returns</h2>
-      <p>Cumulative and monthly nominal vs. inflation-adjusted returns for 5 BVB stocks, 2021–2025.</p>
-    </a>
+    <nav class="toc">
+      <a href="#companies">Companies</a>
+      <a href="#price-volume">Price &amp; Volume</a>
+      <a href="#heatmap">Monthly Returns</a>
+      <a href="#nominal-real">Nominal vs. Real</a>
+      <a href="#regression">Regression</a>
+    </nav>
 
-    <a class="card" href="inflation-regression.html">
-      <h2>Chart 2 — Inflation-Return Regression</h2>
-      <p>Scatter plots and regression lines, plus a sensitivity chart showing how statistical
-      significance depends on the time horizon used.</p>
-    </a>
+    <section id="companies">
+      <div class="section-title">Companies</div>
+      <div class="section-sub">Latest weekly close and week-over-week change</div>
+      <div class="cards" id="company-cards"></div>
+    </section>
+
+    <section id="price-volume">
+      <div class="section-title">Price &amp; Volume</div>
+      <div class="section-sub">Weekly closing price and weekly traded volume, full available history</div>
+      <div class="legend">
+        <div class="legend-item"><span class="swatch price"></span>Price (RON)</div>
+        <div class="legend-item"><span class="swatch volume"></span>Volume</div>
+      </div>
+      <div id="price-volume-charts"></div>
+    </section>
+
+    <section id="heatmap">
+      <div class="section-title">Monthly Price Returns</div>
+      <div class="section-sub">Each cell = one month's price change. Hover a cell for the exact value.</div>
+      <div class="legend">
+        <div class="legend-bar"></div>
+        <div class="legend-ticks"><span>−15%</span><span>0%</span><span>+15%</span></div>
+      </div>
+      <div id="heatmap-charts"></div>
+    </section>
+
+    <section id="nominal-real">
+      <div class="section-title">Nominal vs. Real Returns</div>
+      <div class="section-sub" id="nr-period">…</div>
+      <div class="legend">
+        <div class="legend-item"><span class="swatch nominal"></span>Nominal (exchange price)</div>
+        <div class="legend-item"><span class="swatch real"></span>Real (inflation-adjusted)</div>
+      </div>
+      <div style="position:relative;">
+        <svg id="bar-chart" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="tooltip" id="bar-tooltip"></div>
+      </div>
+      <div class="stats-row" style="margin-top:16px;">
+        <div class="stat-tile">
+          <div class="stat-label">Cumulative inflation, <span id="nr-period-2">…</span></div>
+          <div class="stat-value" id="cum-inflation-value">…</div>
+          <div class="stat-note" id="cum-inflation-note">…</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Average nominal – real gap (5 stocks)</div>
+          <div class="stat-value" id="avg-gap-value">…</div>
+          <div class="stat-note">Roughly how much of the headline gain was "eaten" by inflation, on average.</div>
+        </div>
+      </div>
+      <div class="facets" id="facets" style="margin-top:16px;"></div>
+      <table class="data-table" style="margin-top:16px;">
+        <thead><tr><th>Symbol</th><th>Nominal</th><th>Real</th><th>Gap</th></tr></thead>
+        <tbody id="summary-body"></tbody>
+      </table>
+    </section>
+
+    <section id="regression">
+      <div class="section-title">Inflation-Return Regression</div>
+      <div class="section-sub"><span id="window-label-2">…</span> · 5 stocks × 5 years = <span id="n-obs">…</span> observations</div>
+      <div class="legend">
+        <div class="legend-item"><span class="swatch nominal"></span>Nominal</div>
+        <div class="legend-item"><span class="swatch real"></span>Real (inflation-adjusted)</div>
+      </div>
+      <div class="scatter-row" id="scatter-row"></div>
+      <div class="section-title" style="margin-top:20px;">Why the time horizon matters</div>
+      <div class="section-sub">p-value, by how many prior years are included (counting back from <span id="latest-year">…</span>)</div>
+      <div style="position:relative;">
+        <svg id="sensitivity-chart" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="tooltip" id="sens-tooltip"></div>
+      </div>
+    </section>
 
     <footer>
-      See the <a href="https://github.com/simofleanta/macro-economics-project">repository</a> for the
-      data-collection and analysis scripts, and <code>README.md</code> for methodology and data sources.
+      Sources: prices &amp; volume — Yahoo Finance; inflation — Eurostat HICP, Romania. Real return = nominal
+      return divided by the growth in the HICP index over the same period. Inflation has a ~2-month reporting
+      lag, so windows anchor to the latest available inflation month, not today's date.
     </footer>
   </div>
+
+<script>
+const ns = 'http://www.w3.org/2000/svg';
+function el(tag, attrs) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+const SERIES1 = cssVar('--series-1');
+const SERIES2 = cssVar('--series-2');
+const ORDER = ['SNP','SNG','EL','TLV','SNN'];
+const NAMES = { SNP: 'OMV Petrom', SNG: 'Romgaz', EL: 'Electrica', TLV: 'Banca Transilvania', SNN: 'Nuclearelectrica' };
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function monthLabel(ym) {
+  const [y, m] = ym.split('-');
+  return `${MONTH_NAMES[parseInt(m, 10) - 1]} ${y}`;
+}
+function fmtVolume(v) {
+  if (v >= 1e6) return (v / 1e6).toFixed(1) + 'M';
+  if (v >= 1e3) return (v / 1e3).toFixed(0) + 'K';
+  return String(v);
+}
+function hexToRgb(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+function lerp(a, b, t) { return a + (b - a) * t; }
+function lerpRgb(c1, c2, t) { return [lerp(c1[0],c2[0],t), lerp(c1[1],c2[1],t), lerp(c1[2],c2[2],t)]; }
+function rgbToCss(rgb) { return `rgb(${rgb.map(v => Math.round(v)).join(',')})`; }
+
+// ============================================================
+// Companies overview
+// ============================================================
+fetch('./price-volume-data.json').then(r => r.json()).then(PV => {
+  const container = document.getElementById('company-cards');
+  ORDER.forEach(sym => {
+    const d = PV[sym];
+    const n = d.close.length;
+    const last = d.close[n - 1], prev = d.close[n - 2];
+    const chg = ((last / prev) - 1) * 100;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<div class="sym">${sym}</div>
+      <div class="name">${d.name}</div>
+      <div class="price">${last.toFixed(2)} RON</div>
+      <div class="chg ${chg >= 0 ? 'up' : 'down'}">${chg >= 0 ? '+' : ''}${chg.toFixed(1)}% this week</div>`;
+    container.appendChild(card);
+  });
+  renderPriceVolume(PV);
+});
+
+// ============================================================
+// Price & Volume
+// ============================================================
+function renderPriceVolume(DATA) {
+  const container = document.getElementById('price-volume-charts');
+  ORDER.forEach(sym => {
+    const d = DATA[sym];
+    const n = d.dates.length;
+
+    const block = document.createElement('div');
+    block.className = 'stock-block';
+    block.innerHTML = `<div class="stock-title">${sym} <span style="font-weight:400;color:var(--text-muted);">— ${d.name}</span></div>
+      <div class="stock-sub">${d.dates[0]} – ${d.dates[n - 1]} · weekly</div>`;
+    container.appendChild(block);
+
+    const W = 900, H = 260, ML = 52, MR = 12, MT = 10, MB = 20;
+    const priceH = 160, volH = 60, gap = 10;
+    const plotW = W - ML - MR;
+
+    const priceMin = Math.min(...d.close), priceMax = Math.max(...d.close);
+    const pricePad = (priceMax - priceMin) * 0.08 || 1;
+    const pMin = priceMin - pricePad, pMax = priceMax + pricePad;
+    const volMax = Math.max(...d.volume) * 1.05;
+
+    const xAt = i => ML + (i / (n - 1)) * plotW;
+    const yPriceAt = v => MT + priceH - ((v - pMin) / (pMax - pMin)) * priceH;
+    const yVolAt = v => MT + priceH + gap + volH - (v / volMax) * volH;
+
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: 'xMidYMid meet' });
+
+    for (let s = 0; s <= 3; s++) {
+      const v = pMin + (s / 3) * (pMax - pMin);
+      const y = yPriceAt(v);
+      svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: y, y2: y, class: 'grid-line' }));
+      const t = el('text', { x: ML - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+      t.textContent = v.toFixed(1);
+      svg.appendChild(t);
+    }
+
+    let pathD = '';
+    d.close.forEach((v, i) => { pathD += (i === 0 ? 'M' : 'L') + xAt(i).toFixed(1) + ' ' + yPriceAt(v).toFixed(1) + ' '; });
+    svg.appendChild(el('path', { d: pathD, fill: 'none', stroke: SERIES1, 'stroke-width': 1.75, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+
+    svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: yVolAt(0), y2: yVolAt(0), class: 'baseline' }));
+    const volLabel = el('text', { x: ML - 8, y: yVolAt(volMax) + 8, class: 'axis-label', 'text-anchor': 'end' });
+    volLabel.textContent = fmtVolume(volMax);
+    svg.appendChild(volLabel);
+
+    const barW = Math.max(0.6, plotW / n - 1);
+    d.volume.forEach((v, i) => {
+      const x = xAt(i) - barW / 2;
+      const y = yVolAt(v);
+      const h = yVolAt(0) - y;
+      svg.appendChild(el('rect', { x, y, width: barW, height: Math.max(h, 0.5), fill: SERIES2, opacity: 0.55 }));
+    });
+
+    d.dates.forEach((dt, i) => {
+      if (dt.slice(5, 7) === '01' && (i === 0 || d.dates[i - 1].slice(0, 4) !== dt.slice(0, 4))) {
+        const x = xAt(i);
+        const t = el('text', { x, y: H - 2, class: 'axis-label', 'text-anchor': 'middle' });
+        t.textContent = dt.slice(0, 4);
+        svg.appendChild(t);
+      }
+    });
+
+    const hoverLine = el('line', { x1: 0, x2: 0, y1: MT, y2: MT + priceH + gap + volH, class: 'crosshair', opacity: 0 });
+    svg.appendChild(hoverLine);
+    const dot = el('circle', { r: 3.5, fill: SERIES1, opacity: 0 });
+    svg.appendChild(dot);
+
+    const overlay = el('rect', { x: ML, y: MT, width: plotW, height: priceH + gap + volH, fill: 'transparent' });
+    svg.appendChild(overlay);
+    block.appendChild(svg);
+
+    const tip = document.createElement('div');
+    tip.className = 'tooltip';
+    block.appendChild(tip);
+
+    overlay.addEventListener('mousemove', (ev) => {
+      const rect = svg.getBoundingClientRect();
+      const px = (ev.clientX - rect.left) / rect.width * W;
+      let i = Math.round(((px - ML) / plotW) * (n - 1));
+      i = Math.max(0, Math.min(n - 1, i));
+      const x = xAt(i);
+      hoverLine.setAttribute('x1', x); hoverLine.setAttribute('x2', x); hoverLine.setAttribute('opacity', 1);
+      dot.setAttribute('cx', x); dot.setAttribute('cy', yPriceAt(d.close[i])); dot.setAttribute('opacity', 1);
+      tip.innerHTML = `${d.dates[i]}<br>price: ${d.close[i].toFixed(2)} RON<br>volume: ${fmtVolume(d.volume[i])}`;
+      const blockRect = block.getBoundingClientRect();
+      tip.style.left = (ev.clientX - blockRect.left) + 'px';
+      tip.style.top = (ev.clientY - blockRect.top - 10) + 'px';
+      tip.style.opacity = '1';
+    });
+    overlay.addEventListener('mouseleave', () => {
+      hoverLine.setAttribute('opacity', 0);
+      dot.setAttribute('opacity', 0);
+      tip.style.opacity = '0';
+    });
+  });
+}
+
+// ============================================================
+// Heatmap
+// ============================================================
+fetch('./heatmap-data.json').then(r => r.json()).then(DATA => {
+  const DOMAIN = 15;
+  function divergingColor(value) {
+    const neg = hexToRgb(cssVar('--div-neg'));
+    const pos = hexToRgb(cssVar('--div-pos'));
+    const mid = hexToRgb(cssVar('--div-mid'));
+    const t = Math.max(-1, Math.min(1, value / DOMAIN));
+    const rgb = t < 0 ? lerpRgb(mid, neg, -t) : lerpRgb(mid, pos, t);
+    return rgbToCss(rgb);
+  }
+
+  const container = document.getElementById('heatmap-charts');
+  const tooltip = document.createElement('div');
+  tooltip.className = 'tooltip';
+  document.body.appendChild(tooltip);
+
+  ORDER.forEach(sym => {
+    const d = DATA[sym];
+    const cellByKey = {};
+    d.cells.forEach(c => { cellByKey[`${c.year}-${c.month}`] = c.ret; });
+
+    const block = document.createElement('div');
+    block.className = 'stock-block';
+    block.innerHTML = `<div class="stock-title">${sym} <span style="font-weight:400;color:var(--text-muted);">— ${d.name}</span></div>
+      <div class="stock-sub">${d.years[0]} – ${d.years[d.years.length - 1]}</div>`;
+    container.appendChild(block);
+
+    const scrollWrap = document.createElement('div');
+    scrollWrap.className = 'heat-scroll';
+    block.appendChild(scrollWrap);
+
+    const table = document.createElement('table');
+    table.className = 'heat';
+    const thead = document.createElement('tr');
+    thead.innerHTML = '<th></th>' + MONTH_NAMES.map(m => `<th>${m}</th>`).join('');
+    table.appendChild(thead);
+
+    d.years.forEach(year => {
+      const row = document.createElement('tr');
+      row.innerHTML = `<th class="year-label">${year}</th>`;
+      table.appendChild(row);
+      for (let m = 1; m <= 12; m++) {
+        const key = `${year}-${m}`;
+        const td = document.createElement('td');
+        if (cellByKey[key] === undefined) {
+          td.className = 'empty';
+        } else {
+          const ret = cellByKey[key];
+          td.style.background = divergingColor(ret);
+          td.addEventListener('mousemove', (ev) => {
+            tooltip.innerHTML = `${sym} · ${MONTH_NAMES[m - 1]} ${year}<br>${ret > 0 ? '+' : ''}${ret.toFixed(1)}%`;
+            tooltip.style.left = ev.pageX + 'px';
+            tooltip.style.top = (ev.pageY - 12) + 'px';
+            tooltip.style.opacity = '1';
+          });
+          td.addEventListener('mouseleave', () => tooltip.style.opacity = '0');
+        }
+        row.appendChild(td);
+      }
+    });
+    scrollWrap.appendChild(table);
+
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    summary.textContent = 'View as table';
+    details.appendChild(summary);
+    const dataTable = document.createElement('table');
+    dataTable.className = 'data-table';
+    const dtHead = document.createElement('tr');
+    dtHead.innerHTML = '<th>Year</th>' + MONTH_NAMES.map(m => `<th>${m}</th>`).join('');
+    dataTable.appendChild(dtHead);
+    d.years.forEach(year => {
+      const tr = document.createElement('tr');
+      let cellsHtml = `<td>${year}</td>`;
+      for (let m = 1; m <= 12; m++) {
+        const v = cellByKey[`${year}-${m}`];
+        cellsHtml += `<td>${v === undefined ? '' : (v > 0 ? '+' : '') + v.toFixed(1) + '%'}</td>`;
+      }
+      tr.innerHTML = cellsHtml;
+      dataTable.appendChild(tr);
+    });
+    details.appendChild(dataTable);
+    block.appendChild(details);
+  });
+});
+
+// ============================================================
+// Nominal vs Real
+// ============================================================
+fetch('./real-vs-nominal-data.json').then(r => r.json()).then(DATA => {
+  const SERIES = DATA.series;
+  const META = DATA.meta;
+  const periodText = `${monthLabel(META.start_month)} – ${monthLabel(META.end_month)}`;
+  document.getElementById('nr-period').textContent = `${periodText} · 5 BVB-listed stocks`;
+  document.getElementById('nr-period-2').textContent = periodText;
+  document.getElementById('cum-inflation-value').textContent = `+${META.cumulative_inflation_pct.toFixed(1)}%`;
+  document.getElementById('cum-inflation-note').textContent =
+    `1,000 RON from ${monthLabel(META.start_month)} buys about as much as ~${Math.round(1000 / (1 + META.cumulative_inflation_pct / 100))} RON does today.`;
+  document.getElementById('avg-gap-value').textContent = `${META.avg_gap_pp.toFixed(0)} percentage points`;
+
+  // --- bar chart ---
+  const svg = document.getElementById('bar-chart');
+  const tooltip = document.getElementById('bar-tooltip');
+  const W = 640, H = 300, ML = 44, MR = 10, MT = 16, MB = 34;
+  const plotW = W - ML - MR, plotH = H - MT - MB;
+  const yMax = 450;
+  const groupW = plotW / ORDER.length;
+  const barW = 34, gap = 6;
+
+  for (let v = 0; v <= yMax; v += 100) {
+    const y = MT + plotH - (v / yMax) * plotH;
+    svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: y, y2: y, class: v === 0 ? 'baseline' : 'grid-line' }));
+    const t = el('text', { x: ML - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+    t.textContent = (v === 0 ? '0' : '+' + v) + '%';
+    svg.appendChild(t);
+  }
+
+  ORDER.forEach((sym, i) => {
+    const d = SERIES[sym];
+    const cx = ML + i * groupW + groupW / 2;
+    const bars = [
+      { val: d.final_nominal_pct, color: SERIES1, x: cx - barW - gap / 2 },
+      { val: d.final_real_pct, color: SERIES2, x: cx + gap / 2 },
+    ];
+    bars.forEach(b => {
+      const h = (b.val / yMax) * plotH;
+      const y = MT + plotH - h;
+      const rect = el('rect', { x: b.x, y, width: barW, height: h, rx: 4, fill: b.color });
+      rect.addEventListener('mousemove', (ev) => {
+        const rect2 = svg.getBoundingClientRect();
+        tooltip.innerHTML = `${NAMES[sym]}<br>${b.val > 0 ? '+' : ''}${b.val.toFixed(1)}%`;
+        tooltip.style.left = (ev.clientX - rect2.left) + 'px';
+        tooltip.style.top = (ev.clientY - rect2.top - 10) + 'px';
+        tooltip.style.opacity = '1';
+      });
+      rect.addEventListener('mouseleave', () => tooltip.style.opacity = '0');
+      svg.appendChild(rect);
+
+      const lbl = el('text', { x: b.x + barW / 2, y: y - 6, class: 'axis-label', 'text-anchor': 'middle' });
+      lbl.textContent = (b.val > 0 ? '+' : '') + b.val.toFixed(0) + '%';
+      lbl.style.fill = 'var(--text-secondary)';
+      svg.appendChild(lbl);
+    });
+    const catLabel = el('text', { x: cx, y: H - MB + 18, class: 'axis-label', 'text-anchor': 'middle' });
+    catLabel.textContent = sym;
+    catLabel.style.fontWeight = '600';
+    catLabel.style.fill = 'var(--text-primary)';
+    svg.appendChild(catLabel);
+  });
+
+  // --- small multiples ---
+  const facetsContainer = document.getElementById('facets');
+  ORDER.forEach(sym => {
+    const d = SERIES[sym];
+    const months = d.months, nom = d.nominal_idx, real = d.real_idx;
+    const n = months.length;
+
+    const facet = document.createElement('div');
+    facet.className = 'facet';
+    facet.innerHTML = `<div class="facet-title">${sym} <span style="font-weight:400;color:var(--text-muted);">— ${NAMES[sym]}</span></div>
+      <div class="facet-sub">nominal ${d.final_nominal_pct>0?'+':''}${d.final_nominal_pct.toFixed(0)}% &nbsp;·&nbsp; real ${d.final_real_pct>0?'+':''}${d.final_real_pct.toFixed(0)}%</div>`;
+    facetsContainer.appendChild(facet);
+
+    const W2 = 400, H2 = 200, ML2 = 32, MR2 = 8, MT2 = 10, MB2 = 20;
+    const plotW2 = W2 - ML2 - MR2, plotH2 = H2 - MT2 - MB2;
+
+    const allVals = nom.concat(real);
+    let yMin = Math.min(...allVals, 100), yMax2 = Math.max(...allVals, 100);
+    const pad = (yMax2 - yMin) * 0.08 || 5;
+    yMin = Math.floor((yMin - pad) / 10) * 10;
+    yMax2 = Math.ceil((yMax2 + pad) / 10) * 10;
+
+    const xAt2 = i => ML2 + (i / (n - 1)) * plotW2;
+    const yAt2 = v => MT2 + plotH2 - ((v - yMin) / (yMax2 - yMin)) * plotH2;
+
+    const svg2 = el('svg', { viewBox: `0 0 ${W2} ${H2}`, preserveAspectRatio: 'xMidYMid meet' });
+
+    const steps = 3;
+    for (let s = 0; s <= steps; s++) {
+      const v = yMin + (s / steps) * (yMax2 - yMin);
+      const y = yAt2(v);
+      svg2.appendChild(el('line', { x1: ML2, x2: W2 - MR2, y1: y, y2: y, class: 'grid-line' }));
+      const t = el('text', { x: ML2 - 6, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+      t.textContent = Math.round(v);
+      svg2.appendChild(t);
+    }
+    if (100 >= yMin && 100 <= yMax2) {
+      svg2.appendChild(el('line', { x1: ML2, x2: W2 - MR2, y1: yAt2(100), y2: yAt2(100), class: 'ref-line' }));
+    }
+    months.forEach((m, i) => {
+      if (m.endsWith('-01') || i === 0) {
+        const x = xAt2(i);
+        const t = el('text', { x, y: H2 - MB2 + 14, class: 'axis-label', 'text-anchor': 'middle' });
+        t.textContent = m.slice(0, 4);
+        svg2.appendChild(t);
+      }
+    });
+    function path(vals, color) {
+      let d2 = '';
+      vals.forEach((v, i) => { d2 += (i === 0 ? 'M' : 'L') + xAt2(i).toFixed(1) + ' ' + yAt2(v).toFixed(1) + ' '; });
+      svg2.appendChild(el('path', { d: d2, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+    }
+    path(nom, SERIES1);
+    path(real, SERIES2);
+
+    const hoverLine = el('line', { x1: 0, x2: 0, y1: MT2, y2: MT2 + plotH2, class: 'ref-line', opacity: 0 });
+    svg2.appendChild(hoverLine);
+    const dotNom = el('circle', { r: 3.5, fill: SERIES1, opacity: 0 });
+    const dotReal = el('circle', { r: 3.5, fill: SERIES2, opacity: 0 });
+    svg2.appendChild(dotNom); svg2.appendChild(dotReal);
+
+    const overlay = el('rect', { x: ML2, y: MT2, width: plotW2, height: plotH2, fill: 'transparent' });
+    svg2.appendChild(overlay);
+    facet.appendChild(svg2);
+
+    const tip2 = document.createElement('div');
+    tip2.className = 'tooltip';
+    facet.appendChild(tip2);
+
+    overlay.addEventListener('mousemove', (ev) => {
+      const rect = svg2.getBoundingClientRect();
+      const px = (ev.clientX - rect.left) / rect.width * W2;
+      let i = Math.round(((px - ML2) / plotW2) * (n - 1));
+      i = Math.max(0, Math.min(n - 1, i));
+      const x = xAt2(i);
+      hoverLine.setAttribute('x1', x); hoverLine.setAttribute('x2', x); hoverLine.setAttribute('opacity', 1);
+      dotNom.setAttribute('cx', x); dotNom.setAttribute('cy', yAt2(nom[i])); dotNom.setAttribute('opacity', 1);
+      dotReal.setAttribute('cx', x); dotReal.setAttribute('cy', yAt2(real[i])); dotReal.setAttribute('opacity', 1);
+      tip2.innerHTML = `${months[i]}<br>nominal: ${nom[i].toFixed(0)}<br>real: ${real[i].toFixed(0)}`;
+      const facetRect = facet.getBoundingClientRect();
+      tip2.style.left = (ev.clientX - facetRect.left) + 'px';
+      tip2.style.top = (ev.clientY - facetRect.top - 10) + 'px';
+      tip2.style.opacity = '1';
+    });
+    overlay.addEventListener('mouseleave', () => {
+      hoverLine.setAttribute('opacity', 0);
+      dotNom.setAttribute('opacity', 0);
+      dotReal.setAttribute('opacity', 0);
+      tip2.style.opacity = '0';
+    });
+  });
+
+  // --- summary table ---
+  const body = document.getElementById('summary-body');
+  ORDER.forEach(sym => {
+    const d = SERIES[sym];
+    const gap = (d.final_nominal_pct - d.final_real_pct).toFixed(1);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${sym} — ${NAMES[sym]}</td><td>+${d.final_nominal_pct.toFixed(1)}%</td><td>+${d.final_real_pct.toFixed(1)}%</td><td>${gap} pp</td>`;
+    body.appendChild(tr);
+  });
+});
+
+// ============================================================
+// Regression
+// ============================================================
+fetch('./inflation-regression-data.json').then(r => r.json()).then(RD => {
+  document.getElementById('window-label-2').textContent = RD.window_years;
+  document.getElementById('n-obs').textContent = RD.scatter_points.length;
+  document.getElementById('latest-year').textContent = RD.window_years.split('-')[1];
+
+  function renderScatter(container, points, yKey, line, color, title, sub) {
+    const panel = document.createElement('div');
+    panel.className = 'panel';
+    panel.innerHTML = `<div class="panel-title">${title}</div>
+      <div class="panel-sub">${sub}</div>
+      <div class="stat-badge">R² = <b>${line.r2.toFixed(3)}</b> &nbsp;·&nbsp; p-value = <b>${line.p.toFixed(3)}</b> ${line.p < 0.05 ? '(significant)' : ''}</div>`;
+    container.appendChild(panel);
+
+    const W = 400, H = 260, ML = 40, MR = 10, MT = 14, MB = 30;
+    const plotW = W - ML - MR, plotH = H - MT - MB;
+
+    const xs = points.map(p => p.avg_inflation_pct);
+    const ys = points.map(p => p[yKey]);
+    let xMin = Math.min(...xs), xMax = Math.max(...xs);
+    let yMin = Math.min(...ys, 0), yMax = Math.max(...ys);
+    const xPad = (xMax - xMin) * 0.1, yPad = (yMax - yMin) * 0.1;
+    xMin -= xPad; xMax += xPad; yMin -= yPad; yMax += yPad;
+
+    const xAt = v => ML + ((v - xMin) / (xMax - xMin)) * plotW;
+    const yAt = v => MT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: 'xMidYMid meet' });
+
+    const ySteps = 4;
+    for (let s = 0; s <= ySteps; s++) {
+      const v = yMin + (s / ySteps) * (yMax - yMin);
+      const y = yAt(v);
+      svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: y, y2: y, class: 'grid-line' }));
+      const t = el('text', { x: ML - 6, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+      t.textContent = Math.round(v) + '%';
+      svg.appendChild(t);
+    }
+    if (0 >= yMin && 0 <= yMax) {
+      svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: yAt(0), y2: yAt(0), class: 'baseline' }));
+    }
+    const xSteps = 4;
+    for (let s = 0; s <= xSteps; s++) {
+      const v = xMin + (s / xSteps) * (xMax - xMin);
+      const x = xAt(v);
+      const t = el('text', { x, y: H - MB + 16, class: 'axis-label', 'text-anchor': 'middle' });
+      t.textContent = v.toFixed(0) + '%';
+      svg.appendChild(t);
+    }
+    const xLabel = el('text', { x: ML + plotW / 2, y: H - 2, class: 'axis-label', 'text-anchor': 'middle' });
+    xLabel.textContent = 'average annual inflation';
+    svg.appendChild(xLabel);
+
+    svg.appendChild(el('line', {
+      x1: xAt(line.x[0]), y1: yAt(line.y[0]), x2: xAt(line.x[1]), y2: yAt(line.y[1]),
+      stroke: color, 'stroke-width': 2, 'stroke-linecap': 'round'
+    }));
+
+    const tip = document.createElement('div');
+    tip.className = 'tooltip';
+    panel.appendChild(tip);
+
+    points.forEach(p => {
+      const cx = xAt(p.avg_inflation_pct), cy = yAt(p[yKey]);
+      const c = el('circle', { cx, cy, r: 4, fill: color, opacity: 0.75, stroke: 'var(--surface-1)', 'stroke-width': 1 });
+      c.addEventListener('mousemove', (ev) => {
+        const rect = panel.getBoundingClientRect();
+        tip.innerHTML = `${p.symbol} · ${p.year}<br>inflation: ${p.avg_inflation_pct.toFixed(1)}%<br>return: ${p[yKey].toFixed(1)}%`;
+        tip.style.left = (ev.clientX - rect.left) + 'px';
+        tip.style.top = (ev.clientY - rect.top - 10) + 'px';
+        tip.style.opacity = '1';
+      });
+      c.addEventListener('mouseleave', () => tip.style.opacity = '0');
+      svg.appendChild(c);
+    });
+    panel.appendChild(svg);
+  }
+
+  const scatterContainer = document.getElementById('scatter-row');
+  renderScatter(scatterContainer, RD.scatter_points, 'nominal_ret_yr', RD.nominal_line, SERIES1, 'Nominal', 'annual nominal return (%)');
+  renderScatter(scatterContainer, RD.scatter_points, 'real_ret_yr', RD.real_line, SERIES2, 'Real (inflation-adjusted)', 'annual real return (%)');
+
+  // --- sensitivity chart ---
+  const svg = document.getElementById('sensitivity-chart');
+  const tooltip = document.getElementById('sens-tooltip');
+  const data = RD.sensitivity;
+  const W = 640, H = 300, ML = 44, MR = 14, MT = 16, MB = 40;
+  const plotW = W - ML - MR, plotH = H - MT - MB;
+
+  const yMax = Math.max(1, ...data.map(d => Math.max(d.p_nominal, d.p_real))) * 1.05;
+  const xAt = i => ML + (i / (data.length - 1)) * plotW;
+  const yAt = v => MT + plotH - (v / yMax) * plotH;
+
+  [0, 0.25, 0.5, 0.75, 1.0].forEach(v => {
+    if (v > yMax) return;
+    const y = yAt(v);
+    svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: y, y2: y, class: v === 0 ? 'baseline' : 'grid-line' }));
+    const t = el('text', { x: ML - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+    t.textContent = v.toFixed(2);
+    svg.appendChild(t);
+  });
+
+  const ySig = yAt(0.05);
+  svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: ySig, y2: ySig, class: 'ref-line' }));
+  const sigLabel = el('text', { x: W - MR, y: ySig - 5, class: 'axis-label', 'text-anchor': 'end' });
+  sigLabel.textContent = 'p = 0.05 threshold';
+  svg.appendChild(sigLabel);
+
+  data.forEach((d, i) => {
+    const x = xAt(i);
+    const t = el('text', { x, y: H - MB + 16, class: 'axis-label', 'text-anchor': 'middle' });
+    t.textContent = d.k;
+    svg.appendChild(t);
+    const t2 = el('text', { x, y: H - MB + 28, class: 'axis-label', 'text-anchor': 'middle' });
+    t2.textContent = d.years;
+    t2.style.fontSize = '9px';
+    svg.appendChild(t2);
+  });
+  const xAxisLabel = el('text', { x: ML + plotW / 2, y: H - 2, class: 'axis-label', 'text-anchor': 'middle' });
+  xAxisLabel.textContent = 'last K years included in regression';
+  svg.appendChild(xAxisLabel);
+
+  function drawLine(key, color) {
+    let d = '';
+    data.forEach((pt, i) => { d += (i === 0 ? 'M' : 'L') + xAt(i).toFixed(1) + ' ' + yAt(pt[key]).toFixed(1) + ' '; });
+    svg.appendChild(el('path', { d, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+    data.forEach((pt, i) => {
+      const c = el('circle', { cx: xAt(i), cy: yAt(pt[key]), r: 4, fill: color });
+      c.addEventListener('mousemove', (ev) => {
+        const rect = svg.getBoundingClientRect();
+        tooltip.innerHTML = `${pt.years} (n=${pt.n})<br>p = ${pt[key].toFixed(4)}`;
+        tooltip.style.left = (ev.clientX - rect.left) + 'px';
+        tooltip.style.top = (ev.clientY - rect.top - 10) + 'px';
+        tooltip.style.opacity = '1';
+      });
+      c.addEventListener('mouseleave', () => tooltip.style.opacity = '0');
+      svg.appendChild(c);
+    });
+  }
+  drawLine('p_nominal', SERIES1);
+  drawLine('p_real', SERIES2);
+});
+</script>
 </body>
 </html>
