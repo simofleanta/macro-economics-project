@@ -12,6 +12,13 @@
   },
   "milestones": [
     {
+      "label": "Oct 2021 (PNRR approved, Iohannis)",
+      "cumulative_grants_pct": 0,
+      "cumulative_loans_pct": 0,
+      "source": "EU Council positively evaluates Romania's €29.2bn National Recovery and Resilience Plan (€14.2bn grants + €14.9bn loans) — announced under President Iohannis, part of the ~€80bn EU funding figure he cited (€33.5bn PNRR + €46.4bn regular 2021-2027 EU funds); no money had been disbursed yet",
+      "source_url": "https://mfe.gov.ro/planul-national-de-redresare-si-rezilienta-al-romaniei-evaluat-pozitiv-de-consiliul-uniunii-europene/"
+    },
+    {
       "label": "Payment 1",
       "cumulative_grants_pct": 13.1,
       "source": "Cumulative grant absorption after payment request 1",
