@@ -19,43 +19,43 @@
       "source_url": "https://mfe.gov.ro/planul-national-de-redresare-si-rezilienta-al-romaniei-evaluat-pozitiv-de-consiliul-uniunii-europene/"
     },
     {
-      "label": "Payment 1",
+      "label": "Payment 1 (Ciolacu)",
       "cumulative_grants_pct": 13.1,
-      "source": "Cumulative grant absorption after payment request 1",
+      "source": "Cumulative grant absorption after payment request 1, under PM Ciolacu",
       "source_url": "https://www.factual.ro/declaratii/partial-adevarat-dragos-pislaru-sustine-ca-guvernul-bolojan-ar-fi-avut-cea-mai-mare-rata-de-absorbtie-din-pnrr/"
     },
     {
-      "label": "Payment 2",
+      "label": "Payment 2 (Ciolacu)",
       "cumulative_grants_pct": 26.8,
-      "source": "Cumulative grant absorption after payment request 2",
+      "source": "Cumulative grant absorption after payment request 2, under PM Ciolacu",
       "source_url": "https://www.factual.ro/declaratii/partial-adevarat-dragos-pislaru-sustine-ca-guvernul-bolojan-ar-fi-avut-cea-mai-mare-rata-de-absorbtie-din-pnrr/"
     },
     {
-      "label": "Payment 3",
+      "label": "Payment 3 (Ciolacu)",
       "cumulative_grants_pct": 31.4,
-      "source": "Cumulative grant absorption after payment request 3",
+      "source": "Cumulative grant absorption after payment request 3, under PM Ciolacu",
       "source_url": "https://www.factual.ro/declaratii/partial-adevarat-dragos-pislaru-sustine-ca-guvernul-bolojan-ar-fi-avut-cea-mai-mare-rata-de-absorbtie-din-pnrr/"
     },
     {
       "label": "23 Jun 2025 (Bolojan takes over)",
       "cumulative_grants_pct": 47.0,
-      "source": "Grant absorption at the handover to the Bolojan government",
+      "source": "Grant absorption at the handover from Ciolacu to the Bolojan government",
       "source_url": "https://www.factual.ro/declaratii/partial-adevarat-dragos-pislaru-sustine-ca-guvernul-bolojan-ar-fi-avut-cea-mai-mare-rata-de-absorbtie-din-pnrr/"
     },
     {
-      "label": "Payment 4",
+      "label": "Payment 4 (Bolojan)",
       "cumulative_grants_pct": 63.8,
-      "source": "Cumulative grant absorption after payment request 4 (largest single jump, +16.8pp)",
+      "source": "Cumulative grant absorption after payment request 4, under PM Bolojan (largest single jump, +16.8pp)",
       "source_url": "https://www.factual.ro/declaratii/partial-adevarat-dragos-pislaru-sustine-ca-guvernul-bolojan-ar-fi-avut-cea-mai-mare-rata-de-absorbtie-din-pnrr/"
     },
     {
-      "label": "Payment 5 (Sep 2026)",
+      "label": "Payment 5 (Bolojan, Sep 2026)",
       "cumulative_grants_pct": 78.0,
-      "source": "Grant absorption after payment request 5, pending EC evaluation",
+      "source": "Grant absorption after payment request 5, under PM Bolojan, pending EC evaluation",
       "source_url": "https://spotmedia.ro/stiri/economie/bilantul-pnrr-romania-estimeaza-o-absorbtie-finala-de-9058-din-granturi-si-peste-97-din-imprumuturi-dragos-pislaru-nu-lipsa-resurselor-e-problema-ci-capacitatea-noastra-de-a-le-gestiona"
     },
     {
-      "label": "Final estimate (31 Aug 2026 close)",
+      "label": "Final (Bolojan, 31 Aug 2026)",
       "cumulative_grants_pct": 90.58,
       "cumulative_loans_pct": 97.0,
       "source": "Official closing balance presented by PM Bolojan and Minister Pîslaru",
