@@ -2,6 +2,14 @@
   "note": "No Eurostat/official API publishes a clean absorption time series, so this is curated by hand from official government announcements and press coverage. Update manually when a new figure is announced.",
   "grants_total_eur_bn": 13.57,
   "loans_total_eur_bn": 6.54,
+  "losses": {
+    "total_eur_bn": 1.4,
+    "grants_eur_bn": 1.27,
+    "loans_eur_mio": 160,
+    "salary_law_milestone_eur_mio": 770,
+    "note": "Of the ~€1.4bn in funds ultimately not drawn, €770m alone is tied to the missed 31 Aug 2026 deadline for the unified public-sector salary law milestone.",
+    "source_url": "https://gazarul.ro/2026/09/02/pnrr-s-a-inchis-pentru-romania-cat-am-luat-cat-am-pierdut-si-ce-mai-poate-fi-recuperat/"
+  },
   "milestones": [
     {
       "label": "Payment 1",

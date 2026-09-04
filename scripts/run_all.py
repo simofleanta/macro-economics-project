@@ -8,6 +8,7 @@ STEPS = [
     "scripts/fetch_prices.py",
     "scripts/fetch_inflation.py",
     "scripts/fetch_fiscal_context.py",
+    "scripts/fetch_pnrr_flows.py",
     "scripts/build_nominal_vs_real.py",
     "scripts/build_charts_data.py",
     "scripts/build_price_volume_data.py",

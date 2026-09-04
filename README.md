@@ -112,11 +112,17 @@ public vs. private sector average net wage gap.
 - **Deficit** (`docs/fiscal-deficit-data.json`) is fetched automatically from
   Eurostat (`gov_10dd_edpt1`) by `scripts/fetch_fiscal_context.py`, part of
   the same daily pipeline as inflation.
-- **PNRR absorption** (`docs/pnrr-absorption-data.json`) and the **wage gap**
-  (`docs/wage-gap-data.json`) have no clean public API — both are curated by
-  hand from official announcements and INS press releases, with a source URL
-  attached to every data point. Update these two files manually when new
-  figures are published; they are not touched by the automated workflow.
+- **PNRR funds received and spent** (`docs/pnrr-flows-data.json`) — grants vs.
+  loans received per year, and capital vs. current expenditure recognized per
+  year — is fetched automatically from Eurostat (`gov_rrf_fa`, `gov_rrf_use`)
+  by `scripts/fetch_pnrr_flows.py`, part of the same daily pipeline.
+- **PNRR absorption** (`docs/pnrr-absorption-data.json`), **PNRR by
+  component** (`docs/pnrr-components-data.json`), and the **wage gap**
+  (`docs/wage-gap-data.json`) have no clean public API — all three are
+  curated by hand from official announcements, government plan documents,
+  and INS press releases, with a source URL attached to every data point.
+  Update these files manually when new figures are published; they are not
+  touched by the automated workflow.
 
 ## Repository structure
 

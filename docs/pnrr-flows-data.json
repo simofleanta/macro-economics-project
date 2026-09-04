@@ -1,0 +1,61 @@
+{
+  "received": [
+    {
+      "year": "2021",
+      "grants_mio_eur": 1851.2,
+      "loans_mio_eur": 0.0
+    },
+    {
+      "year": "2022",
+      "grants_mio_eur": 1772.3,
+      "loans_mio_eur": 2732.2
+    },
+    {
+      "year": "2023",
+      "grants_mio_eur": 1868.3,
+      "loans_mio_eur": 893.4
+    },
+    {
+      "year": "2024",
+      "grants_mio_eur": 288.1,
+      "loans_mio_eur": 37.1
+    },
+    {
+      "year": "2025",
+      "grants_mio_eur": 622.5,
+      "loans_mio_eur": 657.3
+    }
+  ],
+  "use": [
+    {
+      "year": "2020",
+      "capital_mio_eur": 0.0,
+      "current_mio_eur": 0.0
+    },
+    {
+      "year": "2021",
+      "capital_mio_eur": 0.0,
+      "current_mio_eur": 0.0
+    },
+    {
+      "year": "2022",
+      "capital_mio_eur": 94.0,
+      "current_mio_eur": 45.5
+    },
+    {
+      "year": "2023",
+      "capital_mio_eur": 684.8,
+      "current_mio_eur": 274.4
+    },
+    {
+      "year": "2024",
+      "capital_mio_eur": 3251.1,
+      "current_mio_eur": 236.7
+    },
+    {
+      "year": "2025",
+      "capital_mio_eur": 5307.5,
+      "current_mio_eur": 2108.3
+    }
+  ]
+}

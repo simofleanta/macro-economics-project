@@ -1,0 +1,22 @@
+{
+  "note": "Sector/component breakdown from the original 2021 PNRR plan (€29.2bn). The plan was renegotiated in 2023-2025 down to €20.1bn (€13.57bn grants + €6.54bn loans) after some investments were moved to EU cohesion funds or cut, so these amounts show where the plan was designed to go, not the final spent total per component. No official source publishes a clean, current per-component breakdown after the cuts.",
+  "source_url": "https://cursdeguvernare.ro/lista-proiecte-pnrr-cele-15-componente-prin-care-pot-fi-accesate-fonduri.html",
+  "total_eur_bn_original": 29.2,
+  "components": [
+    { "code": "C4",  "name": "Sustainable transport",              "eur_bn": 7.62 },
+    { "code": "C15", "name": "Education",                          "eur_bn": 3.60 },
+    { "code": "C9",  "name": "Private sector, R&D and innovation",  "eur_bn": 2.55 },
+    { "code": "C12", "name": "Health",                              "eur_bn": 2.45 },
+    { "code": "C5",  "name": "Renovation wave",                     "eur_bn": 2.20 },
+    { "code": "C10", "name": "Local fund",                          "eur_bn": 2.10 },
+    { "code": "C7",  "name": "Digital transformation",              "eur_bn": 1.88 },
+    { "code": "C6",  "name": "Energy",                              "eur_bn": 1.62 },
+    { "code": "C1",  "name": "Water management",                    "eur_bn": 1.46 },
+    { "code": "C3",  "name": "Waste management",                    "eur_bn": 1.23 },
+    { "code": "C2",  "name": "Forests and biodiversity",             "eur_bn": 1.17 },
+    { "code": "C11", "name": "Tourism and culture",                  "eur_bn": 0.449 },
+    { "code": "C8",  "name": "Fiscal & pension reform",              "eur_bn": 0.457 },
+    { "code": "C13", "name": "Social reforms",                       "eur_bn": 0.197 },
+    { "code": "C14", "name": "Good governance",                      "eur_bn": 0.166 }
+  ]
+}

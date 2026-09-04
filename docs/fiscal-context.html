@@ -115,6 +115,8 @@
     <nav class="toc">
       <a href="#deficit">Budget deficit</a>
       <a href="#pnrr">PNRR absorption</a>
+      <a href="#pnrr-flows">PNRR received &amp; spent</a>
+      <a href="#pnrr-components">PNRR by component</a>
       <a href="#wages">Public vs. private wages</a>
     </nav>
 
@@ -141,6 +143,51 @@
       government announcements and press coverage (see <code>docs/pnrr-absorption-data.json</code> for sources per
       point). Loan-component absorption (renegotiated to €6.54bn) closed above 97%, separately from the grant
       curve shown here.</p>
+    </section>
+
+    <section id="pnrr-flows">
+      <div class="section-title">PNRR: funds received vs. funds actually spent</div>
+      <div class="section-sub">Annual national-accounts data, € million</div>
+      <div class="legend">
+        <div class="legend-item"><span class="swatch s1"></span>Grants / Capital expenditure</div>
+        <div class="legend-item"><span class="swatch s2"></span>Loans / Current expenditure</div>
+      </div>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+        <div>
+          <div class="section-sub" style="margin-bottom:4px;">Funds received from the EU, by year</div>
+          <div style="position:relative;">
+            <svg id="received-chart" viewBox="0 0 380 260" preserveAspectRatio="xMidYMid meet"></svg>
+            <div class="tooltip" id="received-tooltip"></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-sub" style="margin-bottom:4px;">Funds recognized as spent (capital vs. current), by year</div>
+          <div style="position:relative;">
+            <svg id="use-chart" viewBox="0 0 380 260" preserveAspectRatio="xMidYMid meet"></svg>
+            <div class="tooltip" id="use-tooltip"></div>
+          </div>
+        </div>
+      </div>
+      <p class="caveat">Source: Eurostat, datasets <code>gov_rrf_fa</code> (funds received) and
+      <code>gov_rrf_use</code> (uses, split into capital vs. current expenditure) for Romania, auto-fetched
+      alongside the deficit chart above. Note the lag: most grants/loans were received in 2021-2023, but the
+      national accounts only recognize the bulk of the spending in 2024-2025 — money sat before it was actually
+      used.</p>
+    </section>
+
+    <section id="pnrr-components">
+      <div class="section-title">Where the PNRR plan money was allocated</div>
+      <div class="section-sub">By component, original 2021 plan (€29.2bn total)</div>
+      <div style="position:relative;">
+        <svg id="components-chart" viewBox="0 0 800 460" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="tooltip" id="components-tooltip"></div>
+      </div>
+      <p class="caveat">The plan was renegotiated down to €20.1bn (€13.57bn grants + €6.54bn loans) in 2023-2025 —
+      some investments were cut or moved to EU cohesion funds — so this shows where the <em>original</em> plan
+      targeted the money, not a current per-component spend total (no official source publishes a clean, current
+      breakdown after the cuts). Source: curated from
+      <a href="https://cursdeguvernare.ro/lista-proiecte-pnrr-cele-15-componente-prin-care-pot-fi-accesate-fonduri.html">cursdeguvernare.ro</a>,
+      see <code>docs/pnrr-components-data.json</code>.</p>
     </section>
 
     <section id="wages">
@@ -315,7 +362,116 @@ fetch('./pnrr-absorption-data.json').then(r => r.json()).then(DATA => {
       <div class="stat-value">${final.cumulative_loans_pct.toFixed(0)}%+</div>
       <div class="stat-note">of the renegotiated €${DATA.loans_total_eur_bn}bn loan envelope</div>
     </div>
+    <div class="stat-tile">
+      <div class="stat-label">Lost to missed salary-law milestone</div>
+      <div class="stat-value">€${DATA.losses.salary_law_milestone_eur_mio}m</div>
+      <div class="stat-note">of ~€${DATA.losses.total_eur_bn}bn total unclaimed — the unified public-sector wage
+      law missed the 31 Aug 2026 deadline</div>
+    </div>
   `;
+});
+
+// ============================================================
+// PNRR flows: received vs. used
+// ============================================================
+function stackedBarChart(svgId, tooltipId, series, keyA, keyB, colorA, colorB, unit) {
+  const svg = document.getElementById(svgId);
+  const tooltip = document.getElementById(tooltipId);
+  const W = 380, H = 260, ML = 46, MR = 10, MT = 14, MB = 30;
+  const plotW = W - ML - MR, plotH = H - MT - MB;
+
+  const totals = series.map(p => (p[keyA] || 0) + (p[keyB] || 0));
+  const yMax = Math.max(...totals) * 1.15 || 1;
+  const barW = Math.min(46, plotW / series.length - 10);
+  const groupW = plotW / series.length;
+
+  const ySteps = 4;
+  for (let s = 0; s <= ySteps; s++) {
+    const v = (s / ySteps) * yMax;
+    const y = MT + plotH - (v / yMax) * plotH;
+    svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: y, y2: y, class: s === 0 ? 'baseline' : 'grid-line' }));
+    const t = el('text', { x: ML - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+    t.textContent = Math.round(v).toLocaleString();
+    svg.appendChild(t);
+  }
+
+  series.forEach((p, i) => {
+    const cx = ML + i * groupW + groupW / 2;
+    const a = p[keyA] || 0, b = p[keyB] || 0;
+    const yA0 = MT + plotH, yA1 = MT + plotH - (a / yMax) * plotH;
+    const yB1 = yA1 - (b / yMax) * plotH;
+    const rectA = el('rect', { x: cx - barW / 2, y: yA1, width: barW, height: yA0 - yA1, fill: colorA });
+    const rectB = el('rect', { x: cx - barW / 2, y: yB1, width: barW, height: yA1 - yB1, fill: colorB });
+    [rectA, rectB].forEach(r => {
+      r.addEventListener('mousemove', (ev) => {
+        const rect2 = svg.getBoundingClientRect();
+        tooltip.innerHTML = `${p.year}<br>${keyA}: ${a.toLocaleString()} ${unit}<br>${keyB}: ${b.toLocaleString()} ${unit}`;
+        tooltip.style.left = (ev.clientX - rect2.left) + 'px';
+        tooltip.style.top = (ev.clientY - rect2.top - 10) + 'px';
+        tooltip.style.opacity = '1';
+      });
+      r.addEventListener('mouseleave', () => tooltip.style.opacity = '0');
+    });
+    svg.appendChild(rectA);
+    svg.appendChild(rectB);
+    const t = el('text', { x: cx, y: H - MB + 16, class: 'axis-label', 'text-anchor': 'middle' });
+    t.textContent = p.year;
+    svg.appendChild(t);
+  });
+}
+
+fetch('./pnrr-flows-data.json').then(r => r.json()).then(DATA => {
+  stackedBarChart('received-chart', 'received-tooltip', DATA.received, 'grants_mio_eur', 'loans_mio_eur', SERIES1, SERIES2, '€m');
+  stackedBarChart('use-chart', 'use-tooltip', DATA.use, 'capital_mio_eur', 'current_mio_eur', SERIES1, SERIES2, '€m');
+});
+
+// ============================================================
+// PNRR by component
+// ============================================================
+fetch('./pnrr-components-data.json').then(r => r.json()).then(DATA => {
+  const items = DATA.components.slice().sort((a, b) => b.eur_bn - a.eur_bn);
+
+  const svg = document.getElementById('components-chart');
+  const tooltip = document.getElementById('components-tooltip');
+  const W = 800, H = 460, ML = 180, MR = 60, MT = 10, MB = 24;
+  const plotW = W - ML - MR, plotH = H - MT - MB;
+  const rowH = plotH / items.length;
+  const xMax = Math.max(...items.map(d => d.eur_bn)) * 1.1;
+
+  const xAt = v => ML + (v / xMax) * plotW;
+
+  [0, xMax / 2, xMax].forEach(v => {
+    const x = xAt(v);
+    svg.appendChild(el('line', { x1: x, x2: x, y1: MT, y2: MT + plotH, class: v === 0 ? 'baseline' : 'grid-line' }));
+    const t = el('text', { x, y: MT + plotH + 16, class: 'axis-label', 'text-anchor': 'middle' });
+    t.textContent = '€' + v.toFixed(1) + 'bn';
+    svg.appendChild(t);
+  });
+
+  items.forEach((d, i) => {
+    const y = MT + i * rowH + rowH * 0.2;
+    const h = rowH * 0.6;
+    const w = xAt(d.eur_bn) - ML;
+    const rect = el('rect', { x: ML, y, width: Math.max(w, 1), height: h, rx: 3, fill: SERIES1 });
+    rect.addEventListener('mousemove', (ev) => {
+      const rect2 = svg.getBoundingClientRect();
+      tooltip.innerHTML = `${d.code} — ${d.name}<br>€${d.eur_bn}bn`;
+      tooltip.style.left = (ev.clientX - rect2.left) + 'px';
+      tooltip.style.top = (ev.clientY - rect2.top - 10) + 'px';
+      tooltip.style.opacity = '1';
+    });
+    rect.addEventListener('mouseleave', () => tooltip.style.opacity = '0');
+    svg.appendChild(rect);
+
+    const label = el('text', { x: ML - 10, y: y + h / 2 + 3.5, class: 'axis-label', 'text-anchor': 'end' });
+    label.textContent = `${d.code} — ${d.name}`;
+    svg.appendChild(label);
+
+    const valLabel = el('text', { x: ML + w + 6, y: y + h / 2 + 3.5, class: 'axis-label' });
+    valLabel.textContent = '€' + d.eur_bn + 'bn';
+    valLabel.style.fill = 'var(--text-secondary)';
+    svg.appendChild(valLabel);
+  });
 });
 
 // ============================================================
