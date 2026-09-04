@@ -1,0 +1,19 @@
+{
+  "note": "Public vs. private average net wage, from INS (Romania's National Statistics Institute) press releases. No clean API for this split, so it's curated by hand — update manually when INS publishes a new comparison.",
+  "series": [
+    {
+      "year": 2023,
+      "public_net_ron": 4843,
+      "private_net_ron": 4520,
+      "gap_pct": 7.1,
+      "source_url": "https://romanialibera.ro/la-zi/salariile-la-stat-au-fost-mai-mari-cu-aproximativ-14-decat-cele-in-mediul-privat-in-2023/"
+    },
+    {
+      "year": 2024,
+      "public_net_ron": 5923,
+      "private_net_ron": 4665,
+      "gap_pct": 27.0,
+      "source_url": "https://informat.ro/exclusiv/salarii-stat-privat-comparatie-uniunea-europeana-136387"
+    }
+  ]
+}

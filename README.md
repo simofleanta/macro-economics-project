@@ -101,6 +101,23 @@ refresh needed. Note: inflation itself only updates monthly at the source
 (Eurostat), so daily runs mostly refresh the stock price data; the inflation
 numbers change only when Eurostat publishes a new month.
 
+## Fiscal context
+
+[**Fiscal Context**](https://simofleanta.github.io/macro-economics-project/fiscal-context.html)
+— a standalone page with broader macro-fiscal background, independent of the
+stock/inflation analysis above: Romania's general government deficit (%
+GDP), PNRR (EU recovery fund) grant absorption by payment round, and the
+public vs. private sector average net wage gap.
+
+- **Deficit** (`docs/fiscal-deficit-data.json`) is fetched automatically from
+  Eurostat (`gov_10dd_edpt1`) by `scripts/fetch_fiscal_context.py`, part of
+  the same daily pipeline as inflation.
+- **PNRR absorption** (`docs/pnrr-absorption-data.json`) and the **wage gap**
+  (`docs/wage-gap-data.json`) have no clean public API — both are curated by
+  hand from official announcements and INS press releases, with a source URL
+  attached to every data point. Update these two files manually when new
+  figures are published; they are not touched by the automated workflow.
+
 ## Repository structure
 
 ```

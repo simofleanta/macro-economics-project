@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Romania Fiscal Context — Deficit, PNRR, Public/Private Wages</title>
+</head>
+<body>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --surface-2:      #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --axis:           #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-1:       #2a78d6;
+    --series-2:       #eb6834;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --surface-2:      #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #2c2c2a;
+      --axis:           #383835;
+      --border:         rgba(255,255,255,0.10);
+      --series-1:       #3987e5;
+      --series-2:       #d95926;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --surface-2:      #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --axis:           #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-1:       #3987e5;
+    --series-2:       #d95926;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .viz-root {
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 28px 20px 60px;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .subtitle { color: var(--text-secondary); font-size: 14px; line-height: 1.5; margin: 0 0 24px; max-width: 760px; }
+
+  nav.toc {
+    display: flex; gap: 4px; flex-wrap: wrap; padding: 0 0 20px;
+  }
+  nav.toc a {
+    font-size: 12.5px; color: var(--text-secondary); text-decoration: none;
+    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border);
+  }
+  nav.toc a:hover { color: var(--text-primary); border-color: var(--text-muted); }
+
+  section { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 20px 20px 12px; margin-bottom: 20px; scroll-margin-top: 16px; }
+  .section-title { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+  .section-sub { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 14px; }
+  .caveat { font-size: 11.5px; color: var(--text-muted); margin: 8px 0 4px; line-height: 1.5; }
+
+  .legend { display: flex; gap: 18px; align-items: center; margin-bottom: 10px; font-size: 12px; color: var(--text-secondary); }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  .swatch.s1 { background: var(--series-1); }
+  .swatch.s2 { background: var(--series-2); }
+
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .stat-tile { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .stat-label { font-size: 11.5px; color: var(--text-secondary); margin-bottom: 6px; }
+  .stat-value { font-size: 22px; font-weight: 700; line-height: 1.1; }
+  .stat-note { font-size: 11.5px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
+
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .axis-label { fill: var(--text-muted); font-size: 10.5px; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .baseline { stroke: var(--axis); stroke-width: 1; }
+
+  .tooltip {
+    position: absolute; pointer-events: none; background: var(--text-primary); color: var(--surface-1);
+    font-size: 11.5px; padding: 6px 9px; border-radius: 6px; line-height: 1.5; white-space: nowrap;
+    opacity: 0; transform: translate(-50%, -100%); transition: opacity 0.08s; z-index: 5;
+  }
+
+  footer { font-size: 12px; color: var(--text-muted); line-height: 1.6; max-width: 780px; padding-top: 4px; }
+  footer a { color: inherit; }
+</style>
+
+<div class="viz-root">
+  <div class="wrap">
+    <h1>Romania fiscal context</h1>
+    <p class="subtitle">
+      Budget deficit, PNRR (recovery-fund) absorption, and the public/private wage gap —
+      independent background data, not tied to any single statement.
+      See the <a href="https://github.com/simofleanta/macro-economics-project">repository</a> for the code,
+      or the <a href="./index.html">main dashboard</a> for BVB stocks vs. inflation.
+    </p>
+
+    <nav class="toc">
+      <a href="#deficit">Budget deficit</a>
+      <a href="#pnrr">PNRR absorption</a>
+      <a href="#wages">Public vs. private wages</a>
+    </nav>
+
+    <section id="deficit">
+      <div class="section-title">General government deficit</div>
+      <div class="section-sub"><span id="deficit-range">…</span> · % of GDP, ESA 2010 methodology</div>
+      <div style="position:relative;">
+        <svg id="deficit-chart" viewBox="0 0 800 320" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="tooltip" id="deficit-tooltip"></div>
+      </div>
+      <p class="caveat">Source: Eurostat, dataset <code>gov_10dd_edpt1</code> (geo=RO). Annual data; the latest
+      year is often a preliminary estimate, later revised.</p>
+    </section>
+
+    <section id="pnrr">
+      <div class="section-title">PNRR grant absorption</div>
+      <div class="section-sub">Cumulative % of the €13.57bn grant envelope disbursed, by payment round</div>
+      <div style="position:relative;">
+        <svg id="pnrr-chart" viewBox="0 0 800 320" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="tooltip" id="pnrr-tooltip"></div>
+      </div>
+      <div class="stats-row" id="pnrr-stats"></div>
+      <p class="caveat">No official API publishes this as a clean time series — figures are curated by hand from
+      government announcements and press coverage (see <code>docs/pnrr-absorption-data.json</code> for sources per
+      point). Loan-component absorption (renegotiated to €6.54bn) closed above 97%, separately from the grant
+      curve shown here.</p>
+    </section>
+
+    <section id="wages">
+      <div class="section-title">Public vs. private average net wage</div>
+      <div class="section-sub">Average monthly net wage by sector, RON</div>
+      <div class="legend">
+        <div class="legend-item"><span class="swatch s1"></span>Public sector</div>
+        <div class="legend-item"><span class="swatch s2"></span>Private sector</div>
+      </div>
+      <div style="position:relative;">
+        <svg id="wage-chart" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="tooltip" id="wage-tooltip"></div>
+      </div>
+      <p class="caveat">Source: Romania's National Statistics Institute (INS), curated from press releases —
+      no clean API for the public/private split. Only two years are currently available; see
+      <code>docs/wage-gap-data.json</code> for sources per year.</p>
+    </section>
+
+    <footer>
+      This page is independent background context — it is not a fact-check of any particular claim.
+      Compiled from Eurostat and INS official statistics plus curated figures from government
+      announcements, each individually sourced in the underlying JSON files.
+    </footer>
+  </div>
+</div>
+
+<script>
+const ns = 'http://www.w3.org/2000/svg';
+function el(tag, attrs) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function cssVar(name) {
+  return getComputedStyle(document.querySelector('.viz-root')).getPropertyValue(name).trim();
+}
+const SERIES1 = cssVar('--series-1');
+const SERIES2 = cssVar('--series-2');
+
+// ============================================================
+// Budget deficit
+// ============================================================
+fetch('./fiscal-deficit-data.json').then(r => r.json()).then(DATA => {
+  const pts = DATA.series;
+  document.getElementById('deficit-range').textContent = pts[0].year + ' – ' + pts[pts.length - 1].year;
+
+  const svg = document.getElementById('deficit-chart');
+  const tooltip = document.getElementById('deficit-tooltip');
+  const W = 800, H = 320, ML = 44, MR = 14, MT = 16, MB = 30;
+  const plotW = W - ML - MR, plotH = H - MT - MB;
+
+  const ys = pts.map(p => p.deficit_pct_gdp);
+  let yMin = Math.min(0, ...ys), yMax = Math.max(0, ...ys);
+  const yPad = (yMax - yMin) * 0.12 || 1;
+  yMin -= yPad; yMax += yPad;
+
+  const xAt = i => ML + (i / (pts.length - 1)) * plotW;
+  const yAt = v => MT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+  const ySteps = 5;
+  for (let s = 0; s <= ySteps; s++) {
+    const v = yMin + (s / ySteps) * (yMax - yMin);
+    const y = yAt(v);
+    svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: y, y2: y, class: 'grid-line' }));
+    const t = el('text', { x: ML - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+    t.textContent = v.toFixed(0) + '%';
+    svg.appendChild(t);
+  }
+  svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: yAt(0), y2: yAt(0), class: 'baseline' }));
+
+  const eu3 = -3;
+  if (eu3 >= yMin && eu3 <= yMax) {
+    const y = yAt(eu3);
+    svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: y, y2: y, 'stroke-dasharray': '3 3', stroke: 'var(--axis)', 'stroke-width': 1 }));
+    const t = el('text', { x: W - MR, y: y - 5, class: 'axis-label', 'text-anchor': 'end' });
+    t.textContent = 'EU 3% reference';
+    svg.appendChild(t);
+  }
+
+  pts.forEach((p, i) => {
+    const t = el('text', { x: xAt(i), y: H - MB + 16, class: 'axis-label', 'text-anchor': 'middle' });
+    t.textContent = p.year;
+    svg.appendChild(t);
+  });
+
+  let d = '';
+  pts.forEach((p, i) => { d += (i === 0 ? 'M' : 'L') + xAt(i).toFixed(1) + ' ' + yAt(p.deficit_pct_gdp).toFixed(1) + ' '; });
+  svg.appendChild(el('path', { d, fill: 'none', stroke: SERIES1, 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+
+  pts.forEach((p, i) => {
+    const c = el('circle', { cx: xAt(i), cy: yAt(p.deficit_pct_gdp), r: 3.5, fill: SERIES1, opacity: 0.85 });
+    c.addEventListener('mousemove', (ev) => {
+      const rect = svg.getBoundingClientRect();
+      tooltip.innerHTML = `${p.year}<br>deficit: ${p.deficit_pct_gdp.toFixed(1)}% of GDP`;
+      tooltip.style.left = (ev.clientX - rect.left) + 'px';
+      tooltip.style.top = (ev.clientY - rect.top - 10) + 'px';
+      tooltip.style.opacity = '1';
+    });
+    c.addEventListener('mouseleave', () => tooltip.style.opacity = '0');
+    svg.appendChild(c);
+  });
+});
+
+// ============================================================
+// PNRR absorption
+// ============================================================
+fetch('./pnrr-absorption-data.json').then(r => r.json()).then(DATA => {
+  const pts = DATA.milestones;
+
+  const svg = document.getElementById('pnrr-chart');
+  const tooltip = document.getElementById('pnrr-tooltip');
+  const W = 800, H = 320, ML = 44, MR = 14, MT = 16, MB = 70;
+  const plotW = W - ML - MR, plotH = H - MT - MB;
+
+  const yMin = 0, yMax = 100;
+  const xAt = i => ML + (i / (pts.length - 1)) * plotW;
+  const yAt = v => MT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+  const ySteps = 5;
+  for (let s = 0; s <= ySteps; s++) {
+    const v = yMin + (s / ySteps) * (yMax - yMin);
+    const y = yAt(v);
+    svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: y, y2: y, class: 'grid-line' }));
+    const t = el('text', { x: ML - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+    t.textContent = v.toFixed(0) + '%';
+    svg.appendChild(t);
+  }
+  svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: yAt(0), y2: yAt(0), class: 'baseline' }));
+
+  pts.forEach((p, i) => {
+    const x = xAt(i);
+    const words = p.label.split(' ');
+    words.forEach((w, li) => {
+      const t = el('text', { x, y: H - MB + 16 + li * 11, class: 'axis-label', 'text-anchor': 'middle' });
+      t.textContent = w;
+      svg.appendChild(t);
+    });
+  });
+
+  let d = '';
+  pts.forEach((p, i) => { d += (i === 0 ? 'M' : 'L') + xAt(i).toFixed(1) + ' ' + yAt(p.cumulative_grants_pct).toFixed(1) + ' '; });
+  svg.appendChild(el('path', { d, fill: 'none', stroke: SERIES1, 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+
+  pts.forEach((p, i) => {
+    const c = el('circle', { cx: xAt(i), cy: yAt(p.cumulative_grants_pct), r: 4, fill: SERIES1, opacity: 0.9 });
+    c.addEventListener('mousemove', (ev) => {
+      const rect = svg.getBoundingClientRect();
+      tooltip.innerHTML = `${p.label}<br>grants: ${p.cumulative_grants_pct.toFixed(1)}%<br><span style="opacity:0.8">${p.source}</span>`;
+      tooltip.style.left = (ev.clientX - rect.left) + 'px';
+      tooltip.style.top = (ev.clientY - rect.top - 10) + 'px';
+      tooltip.style.opacity = '1';
+    });
+    c.addEventListener('mouseleave', () => tooltip.style.opacity = '0');
+    svg.appendChild(c);
+
+    const lbl = el('text', { x: xAt(i), y: yAt(p.cumulative_grants_pct) - 10, class: 'axis-label', 'text-anchor': 'middle' });
+    lbl.textContent = p.cumulative_grants_pct.toFixed(0) + '%';
+    lbl.style.fill = 'var(--text-secondary)';
+    svg.appendChild(lbl);
+  });
+
+  const final = pts[pts.length - 1];
+  const statsContainer = document.getElementById('pnrr-stats');
+  statsContainer.innerHTML = `
+    <div class="stat-tile">
+      <div class="stat-label">Final grant absorption</div>
+      <div class="stat-value">${final.cumulative_grants_pct.toFixed(1)}%</div>
+      <div class="stat-note">of the €${DATA.grants_total_eur_bn}bn grant envelope</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-label">Final loan absorption</div>
+      <div class="stat-value">${final.cumulative_loans_pct.toFixed(0)}%+</div>
+      <div class="stat-note">of the renegotiated €${DATA.loans_total_eur_bn}bn loan envelope</div>
+    </div>
+  `;
+});
+
+// ============================================================
+// Wage gap
+// ============================================================
+fetch('./wage-gap-data.json').then(r => r.json()).then(DATA => {
+  const pts = DATA.series;
+
+  const svg = document.getElementById('wage-chart');
+  const tooltip = document.getElementById('wage-tooltip');
+  const W = 640, H = 300, ML = 50, MR = 14, MT = 16, MB = 34;
+  const plotW = W - ML - MR, plotH = H - MT - MB;
+
+  const yMax = Math.max(...pts.map(p => p.public_net_ron)) * 1.15;
+  const groupW = plotW / pts.length;
+  const barW = 60, gap = 8;
+
+  for (let v = 0; v <= yMax; v += 1000) {
+    const y = MT + plotH - (v / yMax) * plotH;
+    svg.appendChild(el('line', { x1: ML, x2: W - MR, y1: y, y2: y, class: v === 0 ? 'baseline' : 'grid-line' }));
+    const t = el('text', { x: ML - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+    t.textContent = v.toLocaleString();
+    svg.appendChild(t);
+  }
+
+  pts.forEach((p, i) => {
+    const cx = ML + i * groupW + groupW / 2;
+    const bars = [
+      { val: p.public_net_ron, color: SERIES1, x: cx - barW - gap / 2, label: 'Public' },
+      { val: p.private_net_ron, color: SERIES2, x: cx + gap / 2, label: 'Private' },
+    ];
+    bars.forEach(b => {
+      const h = (b.val / yMax) * plotH;
+      const y = MT + plotH - h;
+      const rect = el('rect', { x: b.x, y, width: barW, height: h, rx: 4, fill: b.color });
+      rect.addEventListener('mousemove', (ev) => {
+        const rect2 = svg.getBoundingClientRect();
+        tooltip.innerHTML = `${p.year} · ${b.label}<br>${b.val.toLocaleString()} RON net`;
+        tooltip.style.left = (ev.clientX - rect2.left) + 'px';
+        tooltip.style.top = (ev.clientY - rect2.top - 10) + 'px';
+        tooltip.style.opacity = '1';
+      });
+      rect.addEventListener('mouseleave', () => tooltip.style.opacity = '0');
+      svg.appendChild(rect);
+
+      const lbl = el('text', { x: b.x + barW / 2, y: y - 6, class: 'axis-label', 'text-anchor': 'middle' });
+      lbl.textContent = b.val.toLocaleString();
+      lbl.style.fill = 'var(--text-secondary)';
+      svg.appendChild(lbl);
+    });
+    const catLabel = el('text', { x: cx, y: H - MB + 18, class: 'axis-label', 'text-anchor': 'middle' });
+    catLabel.textContent = `${p.year}  (+${p.gap_pct.toFixed(0)}%)`;
+    catLabel.style.fontWeight = '600';
+    catLabel.style.fill = 'var(--text-primary)';
+    svg.appendChild(catLabel);
+  });
+});
+</script>
+</body>
+</html>

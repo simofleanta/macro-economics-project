@@ -1,0 +1,68 @@
+{
+  "series": [
+    {
+      "year": "2010",
+      "deficit_pct_gdp": -7.1
+    },
+    {
+      "year": "2011",
+      "deficit_pct_gdp": -5.6
+    },
+    {
+      "year": "2012",
+      "deficit_pct_gdp": -3.8
+    },
+    {
+      "year": "2013",
+      "deficit_pct_gdp": -2.3
+    },
+    {
+      "year": "2014",
+      "deficit_pct_gdp": -1.2
+    },
+    {
+      "year": "2015",
+      "deficit_pct_gdp": -0.5
+    },
+    {
+      "year": "2016",
+      "deficit_pct_gdp": -2.5
+    },
+    {
+      "year": "2017",
+      "deficit_pct_gdp": -2.5
+    },
+    {
+      "year": "2018",
+      "deficit_pct_gdp": -2.8
+    },
+    {
+      "year": "2019",
+      "deficit_pct_gdp": -4.4
+    },
+    {
+      "year": "2020",
+      "deficit_pct_gdp": -9.3
+    },
+    {
+      "year": "2021",
+      "deficit_pct_gdp": -7.2
+    },
+    {
+      "year": "2022",
+      "deficit_pct_gdp": -6.5
+    },
+    {
+      "year": "2023",
+      "deficit_pct_gdp": -6.6
+    },
+    {
+      "year": "2024",
+      "deficit_pct_gdp": -9.3
+    },
+    {
+      "year": "2025",
+      "deficit_pct_gdp": -7.9
+    }
+  ]
+}
