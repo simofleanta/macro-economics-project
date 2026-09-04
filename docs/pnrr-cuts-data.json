@@ -1,0 +1,53 @@
+{
+  "note": "Documented individual cut/loss events for Romania's PNRR, curated by hand from press coverage (no official API publishes this as a clean dataset). These are the major reported events, not a fully non-overlapping waterfall — e.g. the May 2026 permanent loss is part of the payment-request-3 amount suspended in May 2025. The plan's total fell from an original €29.2bn (2021) to €20.1bn (2026), a €9.1bn reduction concentrated almost entirely in the loan component.",
+  "original_plan_eur_bn": 29.2,
+  "final_plan_eur_bn": 20.1,
+  "events": [
+    {
+      "date": "2022",
+      "amount_eur_bn": 0.64,
+      "type": "Grants",
+      "reason": "Recalculated allocation formula — Romania's pandemic-era economic performance came in better than the 2021 estimate, lowering the grant total",
+      "source_url": "https://ziare.com/planul-national-de-redresare-si-rezilienta/pnrr-jaloane-calendar-2021-2026-parcurs-politic-reforme-investitii-ciolacu-ciuca-bolojan-2032352"
+    },
+    {
+      "date": "2025",
+      "amount_eur_bn": 7.1,
+      "type": "Loans",
+      "reason": "Loan component cut — projects judged unfinishable by the Aug 2026 deadline were dropped; some investments (e.g. highway sections with failed tenders, unfinished hospitals) were moved to EU cohesion funds instead",
+      "source_url": "https://economedia.ro/pislaru-romania-are-acum-un-pnrr-de-putin-peste-20-de-miliarde-de-euro-dupa-reducerea-imprumuturilor-si-mutarea-unor-proiecte-pe-fonduri-de-coeziune.html"
+    },
+    {
+      "date": "May 2025",
+      "amount_eur_bn": 0.869,
+      "type": "Suspended",
+      "reason": "European Commission suspended payment on request #3 over 3 unmet milestones — this money was earmarked for: AMEPIP (public-enterprise oversight authority) operationalization, administrator/board appointments at state energy &amp; transport companies, and a special/magistrate pensions reform",
+      "source_url": "https://www.digi24.ro/stiri/economie/comisia-europeana-a-suspendat-869-milioane-de-euro-din-cererea-3-din-pnrr-bolos-anunta-cate-jaloane-sunt-neindeplinite-3263261",
+      "breakdown": [
+        { "label": "AMEPIP operationalization", "amount_eur_mio": 330 },
+        { "label": "State-company administrator appointments (energy &amp; transport)", "amount_eur_mio": 308 },
+        { "label": "Special/magistrate pensions reform", "amount_eur_mio": 231 }
+      ]
+    },
+    {
+      "date": "May 2026",
+      "amount_eur_bn": 0.459,
+      "type": "Permanent loss",
+      "reason": "Definitively lost from the May 2025 suspended amount — mostly from failed administrator/director selection procedures at state energy and transport companies, plus part of the pensions reform",
+      "source_url": "https://ziare.com/planul-national-de-redresare-si-rezilienta/reforme-pnrr-ratate-legea-salarizarii-integritate-companii-stat-psd-pnl-usr-2032338",
+      "breakdown": [
+        { "label": "Energy companies (Hidroelectrica, Romgaz, Nuclearelectrica director selection)", "amount_eur_mio": 180 },
+        { "label": "Transport companies (CNAIR, CFR, Metrorex procedures)", "amount_eur_mio": 15.4 },
+        { "label": "Magistrate pensions reform (of €231m suspended, €166m recovered)", "amount_eur_mio": 65 },
+        { "label": "Remainder (AMEPIP-related, not itemized in press coverage)", "amount_eur_mio": 198.3 }
+      ]
+    },
+    {
+      "date": "Aug 2026",
+      "amount_eur_bn": 0.77,
+      "type": "Grants",
+      "reason": "Missed the 31 Aug 2026 deadline for the unified public-sector salary law milestone",
+      "source_url": "https://gazarul.ro/2026/09/02/pnrr-s-a-inchis-pentru-romania-cat-am-luat-cat-am-pierdut-si-ce-mai-poate-fi-recuperat/"
+    }
+  ]
+}

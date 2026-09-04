@@ -5,65 +5,39 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BVB Dashboard — Stocks vs. Romanian Inflation</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
   :root {
-    color-scheme: light;
-    --surface-1:      #fcfcfb;
-    --surface-2:      #f9f9f7;
-    --text-primary:   #0b0b0b;
-    --text-secondary: #52514e;
-    --text-muted:     #898781;
-    --grid:           #e1e0d9;
-    --axis:           #c3c2b7;
-    --border:         rgba(11,11,11,0.10);
-    --series-1:       #2a78d6; /* price / nominal */
-    --series-2:       #eb6834; /* volume / real */
-    --div-neg:        #e34948;
-    --div-pos:        #2a78d6;
-    --div-mid:        #f0efec;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      color-scheme: dark;
-      --surface-1:      #1a1a19;
-      --surface-2:      #0d0d0d;
-      --text-primary:   #ffffff;
-      --text-secondary: #c3c2b7;
-      --text-muted:     #898781;
-      --grid:           #2c2c2a;
-      --axis:           #383835;
-      --border:         rgba(255,255,255,0.10);
-      --series-1:       #3987e5;
-      --series-2:       #d95926;
-      --div-neg:        #e66767;
-      --div-pos:        #3987e5;
-      --div-mid:        #383835;
-    }
-  }
-  [data-theme="dark"] {
     color-scheme: dark;
-    --surface-1:      #1a1a19;
-    --surface-2:      #0d0d0d;
+    --surface-1:      #0A0E18;
+    --surface-2:      #060810;
     --text-primary:   #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted:     #898781;
-    --grid:           #2c2c2a;
-    --axis:           #383835;
-    --border:         rgba(255,255,255,0.10);
-    --series-1:       #3987e5;
-    --series-2:       #d95926;
-    --div-neg:        #e66767;
-    --div-pos:        #3987e5;
-    --div-mid:        #383835;
+    --text-secondary: rgba(255,255,255,0.6);
+    --text-muted:     rgba(255,255,255,0.35);
+    --grid:           rgba(255,255,255,0.06);
+    --axis:           rgba(255,255,255,0.15);
+    --border:         rgba(255,255,255,0.08);
+    --series-1:       rgba(255,255,255,0.85); /* price / nominal */
+    --series-2:       #eb6834; /* volume / real */
+    --div-neg:        #f5f0e6;
+    --div-pos:        #eb6834;
+    --div-mid:        #12141c;
+    --neg:            #e2574c; /* down-movement text, distinct from the heatmap gradient */
+    --card-glass:     linear-gradient(135deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+    --hero-glow:      radial-gradient(ellipse 80% 40% at 50% -10%, rgba(255,255,255,.04) 0, transparent 70%);
   }
 
   * { box-sizing: border-box; }
   body {
     margin: 0;
     background: var(--surface-2);
+    background-image: var(--hero-glow);
+    background-repeat: no-repeat;
     color: var(--text-primary);
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
   .wrap { max-width: 1040px; margin: 0 auto; padding: 28px 20px 80px; }
+  .back-top { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--text-muted); text-decoration: none; margin-bottom: 14px; transition: color 0.15s; }
+  .back-top:hover { color: var(--text-primary); }
   h1 { font-size: 24px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
   .subtitle { color: var(--text-secondary); font-size: 14px; line-height: 1.5; margin: 0 0 20px; max-width: 720px; }
 
@@ -78,21 +52,21 @@
   }
   nav.toc a:hover { color: var(--text-primary); border-color: var(--text-muted); }
 
-  section { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 20px 20px 12px; margin-bottom: 20px; scroll-margin-top: 56px; }
-  .section-title { font-size: 17px; font-weight: 700; margin: 0 0 2px; }
+  section { background: var(--card-glass); border: 1px solid var(--border); border-radius: 16px; padding: 20px 20px 12px; margin-bottom: 20px; scroll-margin-top: 56px; }
+  .section-title { font-size: 17px; font-weight: 700; margin: 0 0 2px; letter-spacing: -0.01em; }
   .section-sub { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 14px; }
 
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
-  .card { border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .card { background: var(--card-glass); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
   .card .sym { font-size: 15px; font-weight: 700; }
   .card .name { font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px; }
   .card .price { font-size: 20px; font-weight: 700; }
   .card .chg { font-size: 12px; margin-top: 2px; }
   .chg.up { color: var(--series-1); }
-  .chg.down { color: var(--div-neg); }
+  .chg.down { color: var(--neg); }
 
   .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px; }
-  .stat-tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .stat-tile { background: var(--card-glass); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
   .stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
   .stat-value { font-size: 26px; font-weight: 700; line-height: 1.1; }
   .stat-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
@@ -112,13 +86,13 @@
   .baseline { stroke: var(--axis); stroke-width: 1; }
   .ref-line, .crosshair { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3 3; }
 
-  .stock-block { border: 1px solid var(--border); border-radius: 10px; padding: 14px 14px 8px; margin-bottom: 14px; position: relative; }
+  .stock-block { background: var(--card-glass); border: 1px solid var(--border); border-radius: 12px; padding: 14px 14px 8px; margin-bottom: 14px; position: relative; }
   .stock-block:last-child { margin-bottom: 0; }
   .stock-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
   .stock-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
 
   .facets { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
-  .facet { border: 1px solid var(--border); border-radius: 10px; padding: 14px 14px 8px; position: relative; }
+  .facet { background: var(--card-glass); border: 1px solid var(--border); border-radius: 12px; padding: 14px 14px 8px; position: relative; }
   .facet-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
   .facet-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
 
@@ -136,7 +110,7 @@
   table.data-table th:first-child, table.data-table td:first-child { text-align: left; }
 
   .scatter-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
-  .panel { border: 1px solid var(--border); border-radius: 10px; padding: 14px 14px 8px; position: relative; }
+  .panel { background: var(--card-glass); border: 1px solid var(--border); border-radius: 12px; padding: 14px 14px 8px; position: relative; }
   .panel-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
   .panel-sub { font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px; }
   .stat-badge { font-size: 11.5px; color: var(--text-secondary); }
@@ -154,10 +128,10 @@
 </head>
 <body>
   <div class="wrap">
+    <a class="back-top" href="./fiscal-context.html">← Fiscal Context</a>
     <h1>BVB Dashboard</h1>
     <p class="subtitle">
       Stocks vs. Romanian inflation — one page, four views. Data refreshes automatically every month.
-      See the <a href="https://github.com/simofleanta/macro-economics-project">repository</a> for the code.
     </p>
 
     <nav class="toc">

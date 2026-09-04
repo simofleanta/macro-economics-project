@@ -7,54 +7,31 @@
 </head>
 <body>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
   .viz-root {
-    color-scheme: light;
-    --surface-1:      #fcfcfb;
-    --surface-2:      #f9f9f7;
-    --text-primary:   #0b0b0b;
-    --text-secondary: #52514e;
-    --text-muted:     #898781;
-    --grid:           #e1e0d9;
-    --axis:           #c3c2b7;
-    --border:         rgba(11,11,11,0.10);
-    --series-1:       #2a78d6;
-    --series-2:       #eb6834;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:where(:not([data-theme="light"])) .viz-root {
-      color-scheme: dark;
-      --surface-1:      #1a1a19;
-      --surface-2:      #0d0d0d;
-      --text-primary:   #ffffff;
-      --text-secondary: #c3c2b7;
-      --text-muted:     #898781;
-      --grid:           #2c2c2a;
-      --axis:           #383835;
-      --border:         rgba(255,255,255,0.10);
-      --series-1:       #3987e5;
-      --series-2:       #d95926;
-    }
-  }
-  :root[data-theme="dark"] .viz-root {
     color-scheme: dark;
-    --surface-1:      #1a1a19;
-    --surface-2:      #0d0d0d;
+    --surface-1:      #0A0E18;
+    --surface-2:      #060810;
     --text-primary:   #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted:     #898781;
-    --grid:           #2c2c2a;
-    --axis:           #383835;
-    --border:         rgba(255,255,255,0.10);
-    --series-1:       #3987e5;
-    --series-2:       #d95926;
+    --text-secondary: rgba(255,255,255,0.6);
+    --text-muted:     rgba(255,255,255,0.35);
+    --grid:           rgba(255,255,255,0.06);
+    --axis:           rgba(255,255,255,0.15);
+    --border:         rgba(255,255,255,0.08);
+    --series-1:       rgba(255,255,255,0.85);
+    --series-2:       #eb6834;
+    --card-glass:     linear-gradient(135deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+    --hero-glow:      radial-gradient(ellipse 80% 40% at 50% -10%, rgba(255,255,255,.04) 0, transparent 70%);
   }
 
   * { box-sizing: border-box; }
   body { margin: 0; }
   .viz-root {
     background: var(--surface-2);
+    background-image: var(--hero-glow);
+    background-repeat: no-repeat;
     color: var(--text-primary);
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     padding: 28px 20px 60px;
   }
   .wrap { max-width: 900px; margin: 0 auto; }
@@ -70,10 +47,15 @@
   }
   nav.toc a:hover { color: var(--text-primary); border-color: var(--text-muted); }
 
-  section { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 20px 20px 12px; margin-bottom: 20px; scroll-margin-top: 16px; }
-  .section-title { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+  section { background: var(--card-glass); border: 1px solid var(--border); border-radius: 16px; padding: 20px 20px 12px; margin-bottom: 20px; scroll-margin-top: 16px; }
+  .section-title { font-size: 15px; font-weight: 600; margin: 0 0 2px; letter-spacing: -0.01em; }
   .section-sub { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 14px; }
   .caveat { font-size: 11.5px; color: var(--text-muted); margin: 8px 0 4px; line-height: 1.5; }
+  table.breakdown { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px; }
+  table.breakdown th { text-align: left; font-weight: 600; color: var(--text-secondary); padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  table.breakdown td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  table.breakdown td.amount, table.breakdown th.amount { text-align: right; white-space: nowrap; }
+  table.breakdown td.event { color: var(--text-muted); font-size: 11px; }
 
   .legend { display: flex; gap: 18px; align-items: center; margin-bottom: 10px; font-size: 12px; color: var(--text-secondary); }
   .legend-item { display: flex; align-items: center; gap: 6px; }
@@ -82,7 +64,7 @@
   .swatch.s2 { background: var(--series-2); }
 
   .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
-  .stat-tile { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .stat-tile { background: var(--card-glass); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
   .stat-label { font-size: 11.5px; color: var(--text-secondary); margin-bottom: 6px; }
   .stat-value { font-size: 22px; font-weight: 700; line-height: 1.1; }
   .stat-note { font-size: 11.5px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
@@ -100,16 +82,17 @@
 
   footer { font-size: 12px; color: var(--text-muted); line-height: 1.6; max-width: 780px; padding-top: 4px; }
   footer a { color: inherit; }
+  .back-top { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--text-muted); text-decoration: none; margin-bottom: 14px; transition: color 0.15s; }
+  .back-top:hover { color: var(--text-primary); }
 </style>
 
 <div class="viz-root">
   <div class="wrap">
+    <a class="back-top" href="./index.html">← BVB Dashboard</a>
     <h1>Romania fiscal context</h1>
     <p class="subtitle">
       Budget deficit, PNRR (recovery-fund) absorption, and the public/private wage gap —
       independent background data, not tied to any single statement.
-      See the <a href="https://github.com/simofleanta/macro-economics-project">repository</a> for the code,
-      or the <a href="./index.html">main dashboard</a> for BVB stocks vs. inflation.
     </p>
 
     <nav class="toc">
@@ -117,6 +100,7 @@
       <a href="#pnrr">PNRR absorption</a>
       <a href="#pnrr-flows">PNRR received &amp; spent</a>
       <a href="#pnrr-components">PNRR by component</a>
+      <a href="#pnrr-cuts">PNRR cuts</a>
       <a href="#wages">Public vs. private wages</a>
     </nav>
 
@@ -168,11 +152,7 @@
           </div>
         </div>
       </div>
-      <p class="caveat">Source: Eurostat, datasets <code>gov_rrf_fa</code> (funds received) and
-      <code>gov_rrf_use</code> (uses, split into capital vs. current expenditure) for Romania, auto-fetched
-      alongside the deficit chart above. Note the lag: most grants/loans were received in 2021-2023, but the
-      national accounts only recognize the bulk of the spending in 2024-2025 — money sat before it was actually
-      used.</p>
+      <p class="caveat">Source: Eurostat.</p>
     </section>
 
     <section id="pnrr-components">
@@ -183,11 +163,22 @@
         <div class="tooltip" id="components-tooltip"></div>
       </div>
       <p class="caveat">The plan was renegotiated down to €20.1bn (€13.57bn grants + €6.54bn loans) in 2023-2025 —
-      some investments were cut or moved to EU cohesion funds — so this shows where the <em>original</em> plan
-      targeted the money, not a current per-component spend total (no official source publishes a clean, current
-      breakdown after the cuts). Source: curated from
-      <a href="https://cursdeguvernare.ro/lista-proiecte-pnrr-cele-15-componente-prin-care-pot-fi-accesate-fonduri.html">cursdeguvernare.ro</a>,
-      see <code>docs/pnrr-components-data.json</code>.</p>
+      some investments were cut or moved to EU cohesion funds. Source: curated from
+      <a href="https://cursdeguvernare.ro/lista-proiecte-pnrr-cele-15-componente-prin-care-pot-fi-accesate-fonduri.html">cursdeguvernare.ro</a>.</p>
+    </section>
+
+    <section id="pnrr-cuts">
+      <div class="section-title">Where PNRR money was cut or lost</div>
+      <div class="section-sub">€29.2bn (2021) → €20.1bn (2026) — documented cut/loss events</div>
+      <div style="position:relative;">
+        <svg id="cuts-chart" viewBox="0 0 800 260" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="tooltip" id="cuts-tooltip"></div>
+      </div>
+      <div class="section-sub" style="margin-top:18px;">What the suspended/lost money (May 2025 – May 2026) was meant for</div>
+      <table class="breakdown" id="cuts-breakdown"></table>
+      <p class="caveat">These are the major individually-reported events, not a fully non-overlapping
+      waterfall — most of the reduction was in the loan component (renegotiated down, or moved to EU cohesion
+      funds), not the grants. Source: curated from press coverage.</p>
     </section>
 
     <section id="wages">
@@ -201,16 +192,9 @@
         <svg id="wage-chart" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
         <div class="tooltip" id="wage-tooltip"></div>
       </div>
-      <p class="caveat">Source: Romania's National Statistics Institute (INS), curated from press releases —
-      no clean API for the public/private split. Only two years are currently available; see
-      <code>docs/wage-gap-data.json</code> for sources per year.</p>
+      <p class="caveat">Source: Romania's National Statistics Institute (INS), curated from press releases.
+      Only two years are currently available.</p>
     </section>
-
-    <footer>
-      This page is independent background context — it is not a fact-check of any particular claim.
-      Compiled from Eurostat and INS official statistics plus curated figures from government
-      announcements, each individually sourced in the underlying JSON files.
-    </footer>
   </div>
 </div>
 
@@ -472,6 +456,70 @@ fetch('./pnrr-components-data.json').then(r => r.json()).then(DATA => {
     valLabel.style.fill = 'var(--text-secondary)';
     svg.appendChild(valLabel);
   });
+});
+
+// ============================================================
+// PNRR cuts
+// ============================================================
+fetch('./pnrr-cuts-data.json').then(r => r.json()).then(DATA => {
+  const items = DATA.events;
+
+  const svg = document.getElementById('cuts-chart');
+  const tooltip = document.getElementById('cuts-tooltip');
+  const W = 800, H = 260, ML = 100, MR = 60, MT = 10, MB = 24;
+  const plotW = W - ML - MR, plotH = H - MT - MB;
+  const rowH = plotH / items.length;
+  const xMax = Math.max(...items.map(d => d.amount_eur_bn)) * 1.15;
+
+  const xAt = v => ML + (v / xMax) * plotW;
+
+  [0, xMax / 2, xMax].forEach(v => {
+    const x = xAt(v);
+    svg.appendChild(el('line', { x1: x, x2: x, y1: MT, y2: MT + plotH, class: v === 0 ? 'baseline' : 'grid-line' }));
+    const t = el('text', { x, y: MT + plotH + 16, class: 'axis-label', 'text-anchor': 'middle' });
+    t.textContent = '€' + v.toFixed(1) + 'bn';
+    svg.appendChild(t);
+  });
+
+  items.forEach((d, i) => {
+    const y = MT + i * rowH + rowH * 0.2;
+    const h = rowH * 0.6;
+    const w = xAt(d.amount_eur_bn) - ML;
+    const rect = el('rect', { x: ML, y, width: Math.max(w, 1), height: h, rx: 3, fill: SERIES2 });
+    rect.addEventListener('mousemove', (ev) => {
+      const rect2 = svg.getBoundingClientRect();
+      tooltip.innerHTML = `${d.date} — ${d.type}<br>€${d.amount_eur_bn}bn<br><span style="opacity:0.8; max-width:260px; display:inline-block; white-space:normal;">${d.reason}</span>`;
+      tooltip.style.left = (ev.clientX - rect2.left) + 'px';
+      tooltip.style.top = (ev.clientY - rect2.top - 10) + 'px';
+      tooltip.style.opacity = '1';
+    });
+    rect.addEventListener('mouseleave', () => tooltip.style.opacity = '0');
+    svg.appendChild(rect);
+
+    const label = el('text', { x: ML - 10, y: y + h / 2 - 2, class: 'axis-label', 'text-anchor': 'end' });
+    label.textContent = d.date;
+    svg.appendChild(label);
+    const label2 = el('text', { x: ML - 10, y: y + h / 2 + 10, class: 'axis-label', 'text-anchor': 'end' });
+    label2.textContent = d.type;
+    label2.style.fill = 'var(--text-muted)';
+    svg.appendChild(label2);
+
+    const valLabel = el('text', { x: ML + w + 6, y: y + h / 2 + 3.5, class: 'axis-label' });
+    valLabel.textContent = '€' + d.amount_eur_bn + 'bn';
+    valLabel.style.fill = 'var(--text-secondary)';
+    svg.appendChild(valLabel);
+  });
+
+  const table = document.getElementById('cuts-breakdown');
+  const rows = [];
+  items.forEach(evt => {
+    (evt.breakdown || []).forEach(b => rows.push({ event: `${evt.date} — ${evt.type}`, ...b }));
+  });
+  let html = '<tr><th>What it was for</th><th class="amount">Amount</th><th>Event</th></tr>';
+  rows.forEach(r => {
+    html += `<tr><td>${r.label}</td><td class="amount">€${r.amount_eur_mio}m</td><td class="event">${r.event}</td></tr>`;
+  });
+  table.innerHTML = html;
 });
 
 // ============================================================
