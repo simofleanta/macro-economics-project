@@ -1,0 +1,11 @@
+{
+  "name": "fiscal-poster",
+  "generated_at": "2026-09-15T11:52:15+00:00",
+  "plotly_py": "7.0.0",
+  "plotly_js": "4.0.0",
+  "width": 1600,
+  "height": 1240,
+  "files": {
+    "html": "fiscal-poster.html"
+  }
+}
